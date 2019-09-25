@@ -2,10 +2,10 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
 BiocManager::install("DOSE")
-library(DOSE)
+
 
 BiocManager::install("clusterProfiler")
-library(clusterProfiler)
+
 
 
 data(DO2EG)
@@ -18,10 +18,10 @@ enrichDGO <- function(gene, Gont = "MF", Dont = "DO",
   # perform enrichDO and enrichGO on input of genes.
   # returns a vector of both analyses.
   
-  DOanalysis <- enrichDO(gene, Dont, pvalueCutoff, pAdjustMethod,
+  DOanalysis <- DOSE::enrichDO(gene, Dont, pvalueCutoff, pAdjustMethod,
            universe, minGSSize, maxGSSize, qvalueCutoff, readable)
   
-  GOanalysis <- enrichGO(gene, OrgDb, Gont, pvalueCutoff, pAdjustMethod, universe,
+  GOanalysis <- clusterProfiler::enrichGO(gene, OrgDb, Gont, pvalueCutoff, pAdjustMethod, universe,
                          qvalueCutoff, minGSSize, maxGSSize,
                          readable, pool)
   
