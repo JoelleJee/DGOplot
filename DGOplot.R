@@ -32,8 +32,30 @@ enrichDGO <- function(gene, Gont = "MF", Dont = "DO", OrgDb =  org.Hs.eg.db,
   
 }
 
-DGObarplot < function(enrichResult) {
-  # plot GO and DO analysis 
+DGObarplot < function(DGOResult) {
+  
+  DOanalysis <- DGOResult[1]
+  GOanalysis <- DGOResult[2]
+  
+  # plot GO and DO analysis
+  DOplot <- barplot(DOanalysis)
+  GOplot <- barplot(GOanalysis)
+  
+  # combine the data sets in the above two plots
+  
+  # first order the plot data by its p-value
+  DOplotData <- DOplot$data[order(DOplot$data$pvalue), ]
+  GOplotData <- GOplot$data[order(GOplot$data$pvalue), ]
+  
+  # second give each of them a column rank that numbers the data by its p-value
+  DOplotData$pRank <- seq(1, length.out = nrow(DOplotData))
+  GOplotData$pRank <- seq(1, length.out = nrow(GOplotData))
+  
+  # combind the two dataframes in alternating order
+  DGOplotData <- rbind(DOplotData, GOplotData)
+  DGOplotData <- DGOplotData[order(DGOplotData$pRank, DGOplotData$ID), -10] # get rid of the pRank column
+  
+  # 
   
 }
 
