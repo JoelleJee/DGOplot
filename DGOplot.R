@@ -44,8 +44,8 @@ DGObarplot < function(DGOResult) {
   # combine the data sets in the above two plots
   
   # first order the plot data by its p-value
-  DOplotData <- DOplot$data[order(DOplot$data$pvalue), ]
-  GOplotData <- GOplot$data[order(GOplot$data$pvalue), ]
+  DOplotData <- DOplot$data[order(DOplot$data$p.adjust), ]
+  GOplotData <- GOplot$data[order(GOplot$data$p.adjust), ]
   
   # second give each of them a column rank that numbers the data by its p-value
   DOplotData$pRank <- seq(1, length.out = nrow(DOplotData))
