@@ -1,6 +1,11 @@
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
+if (!requireNamespace("ggplot2", quietly = TRUE))
+  install.packages("ggplot2")
+
+library(ggplot2)
+
 BiocManager::install("DOSE")
 
 
@@ -53,9 +58,46 @@ DGObarplot < function(DGOResult) {
   
   # combind the two dataframes in alternating order
   DGOplotData <- rbind(DOplotData, GOplotData)
-  DGOplotData <- DGOplotData[order(DGOplotData$pRank, DGOplotData$ID), -10] # get rid of the pRank column
+  DGOplotData <- DGOplotData[order(DGOplotData$pRank, DGOplotData$ID), ]
   
-  # 
+  
+  # Now have to make "groups" to make a double bar plot of DO and GO analysis.
+  
+  # ontology type
+  ont <- substr(DGOplotData$ID, 1, 2)
+  
+  # ontology term combine by rank or p.adjust
+  numDO <- nrow(DOplotData)
+  numGO <- nrow(GOplotData)
+  
+  numGroups <- min(numDO, numGO) + abs(numDO - numGO) # to account for the difference of analysis results
+  
+  # denote the groups by term
+  term <- character(numGroups)
+  
+  # indices of DGOplotData to combine GO and DO terms for grouping
+  iterGroups = c(seq(1, by = 2, length.out = min(numDO, numGO)), 
+                 seq((2 * min(numDO, numGO) + 1), nrow(DGOplotData)))
+  
+  # iterate DGOplotData to store groups in term               
+  iterTerm <- 1
+  for (i in iterGroups) {
+    if (i <= min(numDO, numGO) * 2) {
+      term[c(iterTerm, iterTerm + 1)] <- paste(DGOplotData$Description[i], "\n", DGOplotData$Description[i + 1])
+      iterTerm <- iterTerm + 2
+      }else {
+      term[iterTerm] <- paste(DGOplotData$Description[i])
+      iterTerm <- iterTerm + 1
+    }
+  }
+  
+  doubleBarplotData <- data.frame(ont, term, DGOplotData$Count, DGOplotData$p.adjust, DGOplotData$pRank)
+  names(doubleBarplotData) <- c("ont", "term", "count", "p.adjust","pRank")
+  
+  doubleBarplot <- ggplot(doubleBarplotData, aes(reorder(term, pRank), count, fill = ont)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    scale_fill_brewer(palette = "Set1") +
+    coord_flip() 
   
 }
 
