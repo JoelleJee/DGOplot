@@ -11,6 +11,8 @@ BiocManager::install("DOSE")
 
 BiocManager::install("clusterProfiler")
 
+install.packages("ggnewscale")
+library(ggnewscale)
 
 
 data(DO2EG)
@@ -37,14 +39,14 @@ enrichDGO <- function(gene, Gont = "MF", Dont = "DO", OrgDb =  org.Hs.eg.db,
   
 }
 
-DGObarplot < function(DGOResult) {
+DGObarplot <- function(DGOResult, showCategory = 8) {
   
-  DOanalysis <- DGOResult[1]
-  GOanalysis <- DGOResult[2]
+  DOanalysis <- DGOResult[[1]]
+  GOanalysis <- DGOResult[[2]]
   
   # plot GO and DO analysis
-  DOplot <- barplot(DOanalysis)
-  GOplot <- barplot(GOanalysis)
+  DOplot <- barplot(DOanalysis, showCategory)
+  GOplot <- barplot(GOanalysis, showCategory)
   
   # combine the data sets in the above two plots
   
@@ -79,7 +81,8 @@ DGObarplot < function(DGOResult) {
   iterGroups = c(seq(1, by = 2, length.out = min(numDO, numGO)), 
                  seq((2 * min(numDO, numGO) + 1), nrow(DGOplotData)))
   
-  # iterate DGOplotData to store groups in term               
+  # iterate DGOplotData to store groups in term:
+  # one term for each ontology group
   iterTerm <- 1
   for (i in iterGroups) {
     if (i <= min(numDO, numGO) * 2) {
@@ -91,13 +94,43 @@ DGObarplot < function(DGOResult) {
     }
   }
   
+  # combine all to one data frame for plotting a double bar graph
   doubleBarplotData <- data.frame(ont, term, DGOplotData$Count, DGOplotData$p.adjust, DGOplotData$pRank)
   names(doubleBarplotData) <- c("ont", "term", "count", "p.adjust","pRank")
   
-  doubleBarplot <- ggplot(doubleBarplotData, aes(reorder(term, pRank), count, fill = ont)) +
-    geom_bar(stat = "identity", position = "dodge") +
-    scale_fill_brewer(palette = "Set1") +
-    coord_flip() 
+  # plot a double bar graph; group by "ont" and fill by p.adjust value
+  # below is inspired by teunbrand 
+  # https://stackoverflow.com/questions/57613428/grouping-scale-fill-gradient-continuous-grouped-bar-chart
+  doubleBarplot <- ggplot(doubleBarplotData, aes(x=reorder(term, -pRank), y=count)) +
+    geom_bar(stat="identity", aes(col=ont, group=ont, fill=p.adjust), position="dodge") +
+    ylim(0, max(doubleBarplotData$count) + 0.6) + xlab("") + 
+    scale_fill_continuous() + 
+    coord_flip()
+    
+  # take coordinates of layer data of doubleBarplot and match them back to the original data.
+  ldDG <- layer_data(doubleBarplot)
+  ldDG <- ldDG[, c("xmin", "xmax", "ymin", "ymax")]
+  
+  matches <- seq(12, 1)
+  
+  ldDG$p.adjust <- doubleBarplotData$p.adjust[matches]
+  ldDG$term <- doubleBarplotData$term[matches]
+  ldDG$ont <- doubleBarplotData$ont[matches]
+  
+  # make a new plot with geom_rect as layers; 1 for DO and 1 for GO.
+  return (ggplot(mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)) +
+    geom_rect(data=ldDG[ldDG$ont=="GO", ], aes(fill=p.adjust)) +
+    scale_fill_gradient(low="blue", high="lightskyblue1",
+                        limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "GO"])),
+                        name="GO p.adjust") +
+    new_scale_fill() +
+    geom_rect(data=ldDG[ldDG$ont=="DO", ], aes(fill=p.adjust)) +
+    scale_fill_gradient(low="red", high="darksalmon",
+                        limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "DO"])),
+                        name="DO p.adjust") +
+    scale_x_continuous(breaks=seq_along(unique(doubleBarplotData$term)),
+                       labels=rev(unique(doubleBarplotData$term))) +
+    coord_flip())
   
 }
 
