@@ -7,9 +7,10 @@ if (!requireNamespace("ggplot2", quietly = TRUE))
 library(ggplot2)
 
 BiocManager::install("DOSE")
-
+library(DOSE)
 
 BiocManager::install("clusterProfiler")
+library(clusterProfiler)
 
 install.packages("ggnewscale")
 library(ggnewscale)
@@ -17,7 +18,7 @@ library(ggnewscale)
 
 data(DO2EG)
 
-enrichDGO <- function(gene, Gont = "MF", Dont = "DO", OrgDb =  org.Hs.eg.db,
+enrichDGO <- function(gene, Gont = "MF", Dont = "DO", OrgDb = "org.Hs.eg.db",
                       pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
                       qvalueCutoff = 0.2, minGSSize = 10, maxGSSize = 500,
                       readable = FALSE, pool = FALSE){
@@ -118,7 +119,7 @@ DGObarplot <- function(DGOResult, showCategory = 8) {
   ldDG$ont <- doubleBarplotData$ont[matches]
   
   # make a new plot with geom_rect as layers; 1 for DO and 1 for GO.
-  return (ggplot(mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)) +
+  doublePlot <- ggplot(mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)) +
     geom_rect(data=ldDG[ldDG$ont=="GO", ], aes(fill=p.adjust)) +
     scale_fill_gradient(low="blue", high="lightskyblue1",
                         limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "GO"])),
@@ -130,12 +131,18 @@ DGObarplot <- function(DGOResult, showCategory = 8) {
                         name="DO p.adjust") +
     scale_x_continuous(breaks=seq_along(unique(doubleBarplotData$term)),
                        labels=rev(unique(doubleBarplotData$term))) +
-    coord_flip())
+    coord_flip()
+  
+  return (doublePlot)
   
 }
 
-DGOnetplot <- function(enrichReseult) {
+DGOnetplot <- function(DGOResult) {
   # plot gene association network
+  DOnet <- clusterProfiler::cnetplot(DGOResult[[1]], categorySize="pvalue", foldChange=geneList)
+  GOnet <- clusterProfiler::cnetplot(DGOResult[[2]], categorySize="pvalue", foldChange=geneList)
+  
+  
 }
 
 
