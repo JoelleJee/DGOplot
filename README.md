@@ -17,9 +17,9 @@ library("DGOplot")
 ## Overview
 
 An overview of the package is illustrated below.
-![image](C:\Users\Joelle\Desktop\BCB410\Assignment\Jee_Y_A1.png)
-![image](C:\Users\Joelle\Desktop\BCB410\DGOnetplot.jpg)
-![image](C:\Users\Joelle\Desktop\BCB410\DGObarplot.png)
+![](./inst/extdata/DGObarplot.png)
+![](./inst/extdata/DGOnetplot.jpg)
+![](./inst/extdata/Jee_Y_A1.png)
 
 ## Contributions
 
