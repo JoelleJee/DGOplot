@@ -281,10 +281,6 @@ DGOnetplot <- function(DGOResult, showCategory = 5,
   legend(x=1.5, y=0.5, dataToPlot$Description, pch=21, col = termColor,
          pt.bg=termColor, pt.cex=2, cex=.8, bty="n", ncol=1)
   
-  # dev.off()
-  
-  # return(graphNetPlot)
-  
 }
 
 

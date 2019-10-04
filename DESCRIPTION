@@ -1,0 +1,17 @@
+Package: DGOplot
+Type: Package
+Title: DO and GO enrichment analyses plotting
+Version: 0.1.0
+Author: person("Y", "Jee", email = "joelle.jee@mail.utoronto.ca", role = c("aut", "cre"))
+Maintainer: Y Jee <joelle.jee@mail.utoronto.ca>
+Description: Performs DO and GO enrichment analyses and plots the result into a double bar graph and a gene association network.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 3.1.0)
+Imports: 
+    ggplot2,
+    RColorBrewer,
+    annotate,
+    qgraph
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.1
