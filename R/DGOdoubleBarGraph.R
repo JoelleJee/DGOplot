@@ -13,21 +13,26 @@
 #'   \item ordered by p.adjust value
 #' }
 #'
-#' @examples
-#' DGOgraph <- DGObarplot(DGOResult)
 #'
 #' @export
 #' @import ggplot2
+#' @importFrom ggnewscale new_scale_fill
+#' @importFrom graphics barplot
+#' @importFrom stats reorder
 
 
 DGObarplot <- function(DGOResult, showCategory = 8) {
   
-  DOanalysis <- DGOResult["DO"]
-  GOanalysis <- DGOResult["GO"]
+  if (length(DGOResult) != 2) {
+    stop("The input should be a list of 2 enricResult objects.")
+  }
+  
+  DOanalysis <- DGOResult[["DO"]]
+  GOanalysis <- DGOResult[["GO"]]
   
   # plot GO and DO analysis
-  DOplot <- barplot(DOanalysis, showCategory)
-  GOplot <- barplot(GOanalysis, showCategory)
+  DOplot <- graphics::barplot(DOanalysis, showCategory)
+  GOplot <- graphics::barplot(GOanalysis, showCategory)
   
   # combine the data sets in the above two plots
   
@@ -82,11 +87,11 @@ DGObarplot <- function(DGOResult, showCategory = 8) {
   # plot a double bar graph; group by "ont" and fill by p.adjust value
   # below is inspired by teunbrand 
   # https://stackoverflow.com/questions/57613428/grouping-scale-fill-gradient-continuous-grouped-bar-chart
-  doubleBarplot <- ggplot2::ggplot(doubleBarplotData, aes(x=reorder(term, -pRank), y=count)) +
-    geom_bar(stat="identity", aes(col=ont, group=ont, fill=p.adjust), position="dodge") +
-    ylim(0, max(doubleBarplotData$count) + 0.6) + xlab("") + 
-    scale_fill_continuous() + 
-    coord_flip()
+  doubleBarplot <- ggplot2::ggplot(doubleBarplotData, aes(x=stats::reorder(term, -pRank), y=count)) +
+    ggplot2::geom_bar(stat="identity", aes(col=ont, group=ont, fill=p.adjust), position="dodge") +
+    ggplot2::ylim(0, max(doubleBarplotData$count) + 0.6) + ggplot2::xlab("") + 
+    ggplot2::scale_fill_continuous() + 
+    ggplot2::coord_flip()
   
   # take coordinates of layer data of doubleBarplot and match them back to the original data.
   ldDG <- ggplot2::layer_data(doubleBarplot)
@@ -99,14 +104,14 @@ DGObarplot <- function(DGOResult, showCategory = 8) {
   ldDG$ont <- doubleBarplotData$ont[matches]
   
   # make a new plot with geom_rect as layers; 1 for DO and 1 for GO.
-  doublePlot <- ggplot2::ggplot(mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)) +
+  doublePlot <- ggplot2::ggplot(mapping=aes(xmin=get(xmin), xmax=xmax, ymin=ymin, ymax=ymax)) + 
     ggplot2::geom_rect(data=ldDG[ldDG$ont=="GO", ], aes(fill=p.adjust)) +
-    ggplot2::scale_fill_gradient(low="blue", high="lightskyblue1",
+    ggplot2::scale_fill_gradient(low='blue', high='lightskyblue1',
                         limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "GO"])),
                         name="GO p.adjust") +
-    ggplot2::new_scale_fill() +
+    ggnewscale::new_scale_fill() +
     ggplot2::geom_rect(data=ldDG[ldDG$ont=="DO", ], aes(fill=p.adjust)) +
-    ggplot2::scale_fill_gradient(low="red", high="darksalmon",
+    ggplot2::scale_fill_gradient(low='red', high='darksalmon',
                         limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "DO"])),
                         name="DO p.adjust") +
     ggplot2::scale_x_continuous(breaks=seq_along(unique(doubleBarplotData$term)),

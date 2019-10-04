@@ -4,14 +4,14 @@
 \alias{DGOnetplot}
 \title{Draw a gene association network of DO and GO enrichment analyses results.}
 \usage{
-DGOnetplot(DGOResult, showCategory = 5, pvalueCutoff = 0.05,
-  foldChange = NULL, layout = "kk", colorEdge = FALSE,
-  circular = FALSE, node_label = TRUE)
+DGOnetplot(DGOResult, showCategory = 5, pvalueCutoff = 0.05)
 }
 \arguments{
 \item{DGOResult}{DO and GO enrichment analysis result returned from enrichDGO().}
 
 \item{showCategory}{number of ontology groups to show from DO and GO each.}
+
+\item{pvalueCutoff}{p-value cutoff.}
 }
 \value{
 Returns a gene association network of DO and GO analyses.
@@ -23,8 +23,4 @@ Returns a gene association network of DO and GO analyses.
 }
 \description{
 A function that draws a gene association network with DO and GO terms from enrichment analyses.
-}
-\examples{
-DGOnetplot(DGOResult, showCategory = 4)
-
 }

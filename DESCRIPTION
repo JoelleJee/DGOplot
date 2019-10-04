@@ -7,11 +7,22 @@ Maintainer: Y Jee <joelle.jee@mail.utoronto.ca>
 Description: Performs DO and GO enrichment analyses and plots the result into a double bar graph and a gene association network.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Depends: R (>= 3.1.0)
+Depends: 
+  R (>= 3.1.0),
+  BiocManager,
+  DOSE,
+  clusterProfiler,
+  org.Hs.eg.db
 Imports: 
-    ggplot2,
-    RColorBrewer,
-    annotate,
-    qgraph
+  ggnewscale,
+  graphics,
+  ggplot2,
+  grDevices,
+  annotate,
+  RColorBrewer,
+  stats,
+  igraph
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
+Suggests: 
+    testthat

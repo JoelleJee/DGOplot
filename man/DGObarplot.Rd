@@ -23,7 +23,3 @@ Returns a double bar graph of DO and GO analysis.
 A function that draws a double bar graph
 of DO and GO analysis, ordered and colored by group and p.adjust value.
 }
-\examples{
-DGOgraph <- DGObarplot(DGOResult)
-
-}

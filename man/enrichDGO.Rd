@@ -18,6 +18,8 @@ enrichDGO(gene, Gont = "MF", Dont = "DO", OrgDb = "org.Hs.eg.db",
 
 \item{OrgDb}{OrgDb}
 
+\item{pvalueCutoff}{p-valuve cutoff}
+
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
 \item{universe}{background genes}
@@ -31,8 +33,6 @@ enrichDGO(gene, Gont = "MF", Dont = "DO", OrgDb = "org.Hs.eg.db",
 \item{readable}{whether mapping gene ID to gene Name}
 
 \item{pool}{If ont='ALL', whether pool 3 GO sub-ontologies}
-
-\item{pValueCutoff}{p-valuve cutoff}
 }
 \value{
 Returns a list of 2 enrichResults
@@ -45,10 +45,10 @@ Returns a list of 2 enrichResults
 A function that performs DO and GO enrichment analysis given a list of geneIDs.
 }
 \examples{
-data(geneList)  # load data from DOSE package
+# load data from DOSE
+data(geneList)
 gene <- names(geneList)[abs(geneList) > 2]
-DGOResult <- enrichDGO(gene, universe = names(geneList))
-DOanalysis <- DGOResult["DO"]
-GOanalysis <- DGOResult["GO"]
+enrichDGO(gene, universe=names(geneList))
+
 
 }

@@ -14,15 +14,11 @@ layout.by.attr(graph, wc, cluster.strength = 1, layout = layout.auto)
 
 \item{cluster.strength}{cluster strength}
 
-\item{layout}{}
+\item{layout}{layout}
 }
 \value{
 Returns a layout for the gene association network
 }
 \description{
 A function with an algorithm to spread out the nodes in an association network.
-}
-\examples{
-DGOgraph <- DGOnetplot(DGOResult)
-
 }

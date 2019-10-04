@@ -6,7 +6,7 @@
 #' @param Gont GO categories; one of "BP", "MF", "CC", or "ALL" for all three.
 #' @param Dont DO categories; one of DO or DOLite
 #' @param OrgDb OrgDb
-#' @param pValueCutoff p-valuve cutoff
+#' @param pvalueCutoff p-valuve cutoff
 #' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 #' @param universe background genes
 #' @param qvalueCutoff q-value cutoff
@@ -21,18 +21,18 @@
 #'   \item GOanalysis - an enrichResult object with DO enrichment analysis result
 #' }
 #'
-#' @examples
-#' data(geneList)  # load data from DOSE package
+#' @examples 
+#' # load data from DOSE
+#' data(geneList)
 #' gene <- names(geneList)[abs(geneList) > 2]
-#' DGOResult <- enrichDGO(gene, universe = names(geneList))
-#' DOanalysis <- DGOResult["DO"]
-#' GOanalysis <- DGOResult["GO"]
+#' enrichDGO(gene, universe=names(geneList))
+#' 
 #'
 #' @export
 #' @import org.Hs.eg.db
 #' @import BiocManager
-#' @import DOSE
-#' @import clusterProfiler
+#' @importFrom DOSE enrichDO
+#' @importFrom clusterProfiler enrichGO
 enrichDGO <- function(gene, Gont = "MF", Dont = "DO", OrgDb = "org.Hs.eg.db",
                       pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
                       qvalueCutoff = 0.2, minGSSize = 10, maxGSSize = 500,
@@ -47,6 +47,11 @@ enrichDGO <- function(gene, Gont = "MF", Dont = "DO", OrgDb = "org.Hs.eg.db",
                                           maxGSSize, readable, pool)
   
   DGOanalysis <- c(DOanalysis, GOanalysis)
+  
+  if (length(DGOanalysis) == 0) {
+      stop("The input should be a vector of gene IDs with a fold change")
+  }
+  
   names(DGOanalysis) <- c("DO", "GO")
   
   # returns a list of both analyses.

@@ -6,22 +6,20 @@
 #' @param graph garph
 #' @param wc number of vertices added for algorithm
 #' @param cluster.strength cluster strength
-#' @param layout
+#' @param layout layout
 #'
 #' @return Returns a layout for the gene association network
-#'
-#' @examples
-#' DGOgraph <- DGOnetplot(DGOResult)
-#'
-#' @import qgraph
+#' 
+#' @export
+#' @import igraph
 
 layout.by.attr <- function(graph, wc, cluster.strength=1,layout=layout.auto) {  
-  g <- graph.edgelist(get.edgelist(graph)) # create a lightweight copy of graph w/o the attributes.
+  g <- igraph::graph.edgelist(igraph::get.edgelist(graph)) # create a lightweight copy of graph w/o the attributes.
   E(g)$weight <- 1
   
   attr <- cbind(id=1:vcount(g), val=wc)
-  g <- g + vertices(unique(attr[,2])) + qgraph::edges(unlist(t(attr)), weight=cluster.strength)
+  g <- g + igraph::vertices(unique(attr[,2])) + igraph::edges(unlist(t(attr)), weight=cluster.strength)
   
-  l <- layout(g, weights=E(g)$weight)[1:vcount(graph),]
+  l <- layout(g, weights=E(g)$weight)[1:igraph::vcount(graph),]
   return(l)
 }
