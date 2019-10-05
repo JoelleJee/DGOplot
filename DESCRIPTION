@@ -12,9 +12,9 @@ Depends:
   BiocManager,
   DOSE,
   clusterProfiler,
-  org.Hs.eg.db
+  org.Hs.eg.db,
+  ggnewscale
 Imports: 
-  ggnewscale,
   graphics,
   ggplot2,
   grDevices,

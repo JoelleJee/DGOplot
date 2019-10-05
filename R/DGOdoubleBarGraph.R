@@ -15,8 +15,8 @@
 #'
 #'
 #' @export
-#' @import ggplot2
-#' @importFrom ggnewscale new_scale_fill
+#' @importFrom  ggplot2 guide_colourbar
+#' @import ggnewscale
 #' @importFrom graphics barplot
 #' @importFrom stats reorder
 
@@ -87,8 +87,8 @@ DGObarplot <- function(DGOResult, showCategory = 8) {
   # plot a double bar graph; group by "ont" and fill by p.adjust value
   # below is inspired by teunbrand 
   # https://stackoverflow.com/questions/57613428/grouping-scale-fill-gradient-continuous-grouped-bar-chart
-  doubleBarplot <- ggplot2::ggplot(doubleBarplotData, aes(x=stats::reorder(term, -pRank), y=count)) +
-    ggplot2::geom_bar(stat="identity", aes(col=ont, group=ont, fill=p.adjust), position="dodge") +
+  doubleBarplot <- ggplot2::ggplot(doubleBarplotData, ggplot2::aes(x=stats::reorder(term, -pRank), y=count)) +
+    ggplot2::geom_bar(stat="identity", ggplot2::aes(col=ont, group=ont, fill=p.adjust), position="dodge") +
     ggplot2::ylim(0, max(doubleBarplotData$count) + 0.6) + ggplot2::xlab("") + 
     ggplot2::scale_fill_continuous() + 
     ggplot2::coord_flip()
@@ -104,13 +104,13 @@ DGObarplot <- function(DGOResult, showCategory = 8) {
   ldDG$ont <- doubleBarplotData$ont[matches]
   
   # make a new plot with geom_rect as layers; 1 for DO and 1 for GO.
-  doublePlot <- ggplot2::ggplot(mapping=aes(xmin=get(xmin), xmax=xmax, ymin=ymin, ymax=ymax)) + 
-    ggplot2::geom_rect(data=ldDG[ldDG$ont=="GO", ], aes(fill=p.adjust)) +
+  doublePlot <- ggplot2::ggplot(mapping=ggplot2::aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)) + 
+    ggplot2::geom_rect(data=ldDG[ldDG$ont=="GO", ], ggplot2::aes(fill=p.adjust)) +
     ggplot2::scale_fill_gradient(low='blue', high='lightskyblue1',
                         limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "GO"])),
                         name="GO p.adjust") +
     ggnewscale::new_scale_fill() +
-    ggplot2::geom_rect(data=ldDG[ldDG$ont=="DO", ], aes(fill=p.adjust)) +
+    ggplot2::geom_rect(data=ldDG[ldDG$ont=="DO", ], ggplot2::aes(fill=p.adjust)) +
     ggplot2::scale_fill_gradient(low='red', high='darksalmon',
                         limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "DO"])),
                         name="DO p.adjust") +
