@@ -1,3 +1,4 @@
+
 #' MAkes a legend for DGOnetplot
 #'
 #' A helper function that parses the ontology names to generate a legend.

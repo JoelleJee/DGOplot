@@ -165,7 +165,7 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
     par(opar)
     par(mar = c(0,0,0,0),
         oma = c(0,0,0,0.5))
-    graphics::legend(x=0.72, y=0.85,lgnd, pch=21, col = termCol,
+    graphics::legend(x=0.75, y=0.85,lgnd, pch=21, col = termCol,
                      pt.bg=termCol, cex = 0.7, pt.cex=1.5, bty="n", ncol=1)
     par(mar = c(0,0,3,0))
     graphics::title(main = "Gene Association Network",
