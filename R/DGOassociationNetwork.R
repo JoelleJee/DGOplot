@@ -148,8 +148,7 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
   lgnd <- makeLegend(plotDat$Description)
   
   # Finally plot the result
-  net <- function(){
-    dev.off()
+  net = function(){
     opar <- par(no.readonly = TRUE)
     par(bg = "gray60",
         oma = c(0,0,0,9),
