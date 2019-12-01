@@ -146,18 +146,33 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
   igraph::E(graphNet)$color <- c(DOEdgeCols, GOEdgeCols)
   
   # Finally plot the result
-  par(bg = "gray60")
+  dev.off()
+  opar <- par()
+  par(bg = "gray60",
+      oma = c(0,0,0,9),
+      mar = c(1,1,1,1))
+  coords <- layout.by.attr(graphNet, wc=1, cluster.strength = 50)
   graphics::plot(graphNet,
                  vertex.label.font.cex = 1,
                  vertex.label.degree = pi/2,
                  vertex.label.dist = 0.5,
                  vertex.label.color = "black",
-                 layout=layout.by.attr(graphNet, wc=1, cluster.strength = 50),
+                 layout=coords,
                  bg = 244)
-  
-  # Now add a legend for the ontology groups
-  graphics::legend(x=1.2, y=0.5, plotDat$Description, pch=21, col = termCol,
+  lgnd <- makeLegend(plotDat$Description)
+  # reset margins to add legend
+  par(opar)
+  par(mar = c(0,0,0,0),
+      omar = c(0,0,0,4))
+  graphics::legend(x=0.75, y=0.9, lgnd, pch=21, col = termCol,
                    pt.bg=termCol, cex = 0.9, pt.cex=2, bty="n", ncol=1)
-  graphics::title(main = "Gene Association Network")
+  par(opar)
+  par(mar = c(0,0,3,0))
+  graphics::title(main = "Gene Association Network",
+                  cex.main = 1.5)
   
+  # save plot to return
+  net <- recordPlot()
+  par(opar)
+  return(net)
 }

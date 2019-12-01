@@ -1,4 +1,4 @@
-#' A simplified function from NetPathMiner by ahmohamed 
+#' A simplified function from NetPathMiner by ahmohamed reconstructed
 #' https://stackoverflow.com/questions/28715736/how-to-spread-out-community-graph-made-by-using-igraph-package-in-r/28722680#28722680
 #'
 #' A function with an algorithm to spread out the nodes in an association network. 
@@ -21,7 +21,8 @@ layout.by.attr <- function(graph, wc, cluster.strength=1,layout=layout.auto) {
   attr <- cbind(id=1:vcount(gCopy), val=wc)
   gCopy <- gCopy + igraph::vertices(unique(attr[,2])) + igraph::edges(unlist(t(attr)), 
                                       weight=cluster.strength)
+  # coordinates of the nodes
+  coords <- layout(gCopy, weights=E(gCopy)$weight)[1:igraph::vcount(graph),]
   
-  l <- layout(gCopy, weights=E(gCopy)$weight)[1:igraph::vcount(graph),]
-  return(l)
+  return(coords)
 }
