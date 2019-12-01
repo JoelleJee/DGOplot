@@ -150,28 +150,25 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
   opar <- par(no.readonly = TRUE)
   par(bg = "gray60",
       oma = c(0,0,0,9),
-      mar = c(1,1,1,1))
+      mar = c(0,0,0,0))
   coords <- layout.by.attr(graphNet, wc=1, cluster.strength = 50)
   graphics::plot(graphNet,
                  vertex.label.font.cex = 1,
                  vertex.label.degree = pi/2,
                  vertex.label.dist = 0.5,
                  vertex.label.color = "black",
-                 layout=coords,
-                 bg = 244)
+                 layout=coords)
   
   # reset margins to add legend
   par(opar)
   par(mar = c(0,0,0,0),
       oma = c(0,0,0,0))
   lgnd <- makeLegend(plotDat$Description)
-  graphics::legend(x=0.72, y=0.9, lgnd, pch=21, col = termCol,
+  graphics::legend(x=0.75, y=0.8,lgnd, pch=21, col = termCol,
                    pt.bg=termCol, cex = 0.7, pt.cex=1.5, bty="n", ncol=1)
   par(mar = c(0,0,3,0))
   graphics::title(main = "Gene Association Network",
                   cex.main = 1.5)
   
-  # save plot to return
-  net <- recordPlot()
-  return(net)
+
 }
