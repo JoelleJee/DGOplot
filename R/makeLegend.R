@@ -22,7 +22,7 @@ makeLegend <- function(descr) {
       title <- paste(f, s, sep = "\n")
     }
     # store the title into lgnd
-    lgnd[i] <- title
+    lgnd[i] <- toupper(title)
   }
   return(lgnd)
 }
