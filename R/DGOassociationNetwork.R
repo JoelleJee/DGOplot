@@ -31,17 +31,17 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
   
   # combine the first showCategory number of groups from DO and GO analysis 
   DOcatN <- min(showCategory, 
-                       sum(DGOResult[["DO"]]@result$p.adjust < pvalueCutoff))
+                sum(DGOResult[["DO"]]@result$p.adjust < pvalueCutoff))
   GOcatN <- min(showCategory, 
-                       sum(DGOResult[["GO"]]@result$p.adjust < pvalueCutoff))
+                sum(DGOResult[["GO"]]@result$p.adjust < pvalueCutoff))
   plotDat <- rbind(DGOResult[["DO"]]@result[1:DOcatN, ], 
-                      DGOResult[["GO"]]@result[1:GOcatN, ])
+                   DGOResult[["GO"]]@result[1:GOcatN, ])
   
   # check if there are at least showCategory number of valid 
   # (p.adjust value less than pvalueCutoff) ontology groups
   # if not, produce warning message, or throw an error and stop if 0 groups.
   warnOntN(DOcatN, GOcatN, showCategory, type = "net")
-
+  
   
   # get all the geneIDs for each ontology group
   numGroups <- nrow(plotDat)
@@ -172,5 +172,6 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
                     cex.main = 1.5)
   }  
   return(net)
-
+  
 }
+  

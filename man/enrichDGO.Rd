@@ -8,7 +8,6 @@ enrichDGO(
   gene,
   Gont = "MF",
   Dont = "DO",
-  OrgDb = "org.Hs.eg.db",
   pvalueCutoff = 0.05,
   pAdjustMethod = "BH",
   universe,
@@ -25,8 +24,6 @@ enrichDGO(
 \item{Gont}{GO categories; one of "BP", "MF", "CC", or "ALL" for all three.}
 
 \item{Dont}{DO categories; one of DO or DOLite}
-
-\item{OrgDb}{OrgDb}
 
 \item{pvalueCutoff}{p-valuve cutoff}
 

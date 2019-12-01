@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphLayout.R
 \name{layout.by.attr}
 \alias{layout.by.attr}
-\title{A simplified function from NetPathMiner by ahmohamed
+\title{A simplified function from NetPathMiner by ahmohamed reconstructed
 https://stackoverflow.com/questions/28715736/how-to-spread-out-community-graph-made-by-using-igraph-package-in-r/28722680#28722680}
 \usage{
 layout.by.attr(graph, wc, cluster.strength = 1, layout = layout.auto)
