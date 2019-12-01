@@ -144,31 +144,34 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
   
   # set the edge colors
   igraph::E(graphNet)$color <- c(DOEdgeCols, GOEdgeCols)
+  # make legend
+  lgnd <- makeLegend(plotDat$Description)
   
   # Finally plot the result
-  dev.off()
-  opar <- par(no.readonly = TRUE)
-  par(bg = "gray60",
-      oma = c(0,0,0,9),
-      mar = c(0,0,0,0))
-  coords <- layout.by.attr(graphNet, wc=1, cluster.strength = 50)
-  graphics::plot(graphNet,
-                 vertex.label.font.cex = 1,
-                 vertex.label.degree = pi/2,
-                 vertex.label.dist = 0.5,
-                 vertex.label.color = "black",
-                 layout=coords)
-  
-  # reset margins to add legend
-  par(opar)
-  par(mar = c(0,0,0,0),
-      oma = c(0,0,0,0))
-  lgnd <- makeLegend(plotDat$Description)
-  graphics::legend(x=0.75, y=0.8,lgnd, pch=21, col = termCol,
-                   pt.bg=termCol, cex = 0.7, pt.cex=1.5, bty="n", ncol=1)
-  par(mar = c(0,0,3,0))
-  graphics::title(main = "Gene Association Network",
-                  cex.main = 1.5)
-  
+  net <- function(){
+    dev.off()
+    opar <- par(no.readonly = TRUE)
+    par(bg = "gray60",
+        oma = c(0,0,0,9),
+        mar = c(0,0,0,0))
+    coords <- layout.by.attr(graphNet, wc=1, cluster.strength = 50)
+    graphics::plot(graphNet,
+                   vertex.label.font.cex = 1,
+                   vertex.label.degree = pi/2,
+                   vertex.label.dist = 0.5,
+                   vertex.label.color = "black",
+                   layout=coords)
+    
+    # reset margins to add legend
+    par(opar)
+    par(mar = c(0,0,0,0),
+        oma = c(0,0,0,0.5))
+    graphics::legend(x=0.72, y=0.85,lgnd, pch=21, col = termCol,
+                     pt.bg=termCol, cex = 0.7, pt.cex=1.5, bty="n", ncol=1)
+    par(mar = c(0,0,3,0))
+    graphics::title(main = "Gene Association Network",
+                    cex.main = 1.5)
+  }  
+  return(net)
 
 }
