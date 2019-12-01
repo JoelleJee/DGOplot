@@ -1,3 +1,11 @@
+#' MAkes a legend for DGOnetplot
+#'
+#' A helper function that parses the ontology names to generate a legend.
+#' 
+#' @param descr a vector of gene ontology names
+#'
+#' @return Returns a legend to use for DGPnetplot
+#'
 makeLegend <- function(descr) {
   # construct legend (separate long names with newline)
   numLgnd <- length(descr)
