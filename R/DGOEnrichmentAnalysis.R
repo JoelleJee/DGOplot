@@ -5,7 +5,6 @@
 #' @param gene a vector of entrez gene id.
 #' @param Gont GO categories; one of "BP", "MF", "CC", or "ALL" for all three.
 #' @param Dont DO categories; one of DO or DOLite
-#' @param OrgDb OrgDb
 #' @param pvalueCutoff p-valuve cutoff
 #' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 #' @param universe background genes
@@ -23,6 +22,7 @@
 #'
 #' @examples 
 #' # load data from DOSE
+#' library(DOSE)
 #' data(geneList)
 #' gene <- names(geneList)[abs(geneList) > 2]
 #' enrichDGO(gene, universe=names(geneList))
@@ -33,7 +33,7 @@
 #' @import BiocManager
 #' @importFrom DOSE enrichDO
 #' @importFrom clusterProfiler enrichGO
-enrichDGO <- function(gene, Gont = "MF", Dont = "DO", OrgDb = "org.Hs.eg.db",
+enrichDGO <- function(gene, Gont = "MF", Dont = "DO",
                       pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
                       qvalueCutoff = 0.2, minGSSize = 10, maxGSSize = 500,
                       readable = FALSE, pool = FALSE){
@@ -42,7 +42,7 @@ enrichDGO <- function(gene, Gont = "MF", Dont = "DO", OrgDb = "org.Hs.eg.db",
   DOanalysis <- DOSE::enrichDO(gene, Dont, pvalueCutoff, pAdjustMethod, 
                                universe, minGSSize, maxGSSize, qvalueCutoff, readable)
   
-  GOanalysis <- clusterProfiler::enrichGO(gene, OrgDb, keyType = "ENTREZID", Gont, pvalueCutoff, 
+  GOanalysis <- clusterProfiler::enrichGO(gene, OrgDb = org.Hs.eg.db, keyType = "ENTREZID", Gont, pvalueCutoff, 
                                           pAdjustMethod, universe, qvalueCutoff, minGSSize, 
                                           maxGSSize, readable, pool)
   

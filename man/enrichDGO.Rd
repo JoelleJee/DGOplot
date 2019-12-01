@@ -4,10 +4,20 @@
 \alias{enrichDGO}
 \title{Perform DO and GO enrichment analysis}
 \usage{
-enrichDGO(gene, Gont = "MF", Dont = "DO", OrgDb = "org.Hs.eg.db",
-  pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
-  qvalueCutoff = 0.2, minGSSize = 10, maxGSSize = 500,
-  readable = FALSE, pool = FALSE)
+enrichDGO(
+  gene,
+  Gont = "MF",
+  Dont = "DO",
+  OrgDb = "org.Hs.eg.db",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  universe,
+  qvalueCutoff = 0.2,
+  minGSSize = 10,
+  maxGSSize = 500,
+  readable = FALSE,
+  pool = FALSE
+)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
@@ -46,6 +56,7 @@ A function that performs DO and GO enrichment analysis given a list of geneIDs.
 }
 \examples{
 # load data from DOSE
+library(DOSE)
 data(geneList)
 gene <- names(geneList)[abs(geneList) > 2]
 enrichDGO(gene, universe=names(geneList))

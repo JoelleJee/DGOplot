@@ -13,13 +13,15 @@
 #' @export
 #' @import igraph
 
-layout.by.attr <- function(graph, wc, cluster.strength=1,layout=layout.auto) {  
-  g <- igraph::graph.edgelist(igraph::get.edgelist(graph)) # create a lightweight copy of graph w/o the attributes.
-  E(g)$weight <- 1
+layout.by.attr <- function(graph, wc, cluster.strength=1,layout=layout.auto) { 
+  # create a lightweight copy of graph w/o the attributes.
+  gCopy <- igraph::graph.edgelist(igraph::get.edgelist(graph)) 
+  E(gCopy)$weight <- 1
   
-  attr <- cbind(id=1:vcount(g), val=wc)
-  g <- g + igraph::vertices(unique(attr[,2])) + igraph::edges(unlist(t(attr)), weight=cluster.strength)
+  attr <- cbind(id=1:vcount(gCopy), val=wc)
+  gCopy <- gCopy + igraph::vertices(unique(attr[,2])) + igraph::edges(unlist(t(attr)), 
+                                      weight=cluster.strength)
   
-  l <- layout(g, weights=E(g)$weight)[1:igraph::vcount(graph),]
+  l <- layout(gCopy, weights=E(gCopy)$weight)[1:igraph::vcount(graph),]
   return(l)
 }

@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of DGOplot is to perform enrichment analses on Disease Ontology and Gene Ontology and plot the result into a bar plot and a gene association network.
+The goal of DGOplot is to perform enrichment analses on Disease Ontology and Gene Ontology and plot the result into a bar plot and a gene association network. Currently limited to HUMAN DATA ONLY.
 
 ## Installation
 
@@ -53,8 +53,13 @@ library(DGOplot)
 data(geneList)
 gene <- names(geneList)[abs(geneList) > 2]
 x <- enrichDGO(gene, universe = names(geneList))
-DGObarPlot(x, showCategory=5)
-DGOnetPlot(x, showCategory=5)
+DGObarplot(x, showCategory=5)
+DGOnetplot(x, showCategory=5)
 
 ```
+
+## Dependencies
+
+Orgs.Hs.eg.db: Human genome data
+ggnewscale, ggplot2, igraph: For bar plot and network plot
 

@@ -5,6 +5,8 @@
 #' 
 #' @param DGOResult DO and GO enrichment analysis result returned from enrichDGO().
 #' @param showCategory number of ontology groups to show from DO and GO each.
+#' @param DOcol color to use for plotting DO (default is red)
+#' @param GOcol color to use for plotting GO (default is blue)
 #'
 #' @return Returns a double bar graph of DO and GO analysis.
 #' \itemize{
@@ -15,109 +17,139 @@
 #'
 #'
 #' @export
-#' @importFrom  ggplot2 guide_colourbar
+#' @import ggplot2
 #' @import ggnewscale
-#' @importFrom graphics barplot
-#' @importFrom stats reorder
+#' @import graphics
 
 
-DGObarplot <- function(DGOResult, showCategory = 8) {
+DGObarplot <- function(DGOResult, showCategory = 8, 
+                       DOcol = "red", GOcol = "blue") {
   
-  if (length(DGOResult) != 2) {
-    stop("The input should be a list of 2 enricResult objects.")
-  }
+  checkInput(DGOResult)
   
   DOanalysis <- DGOResult[["DO"]]
   GOanalysis <- DGOResult[["GO"]]
   
+  # warning message if there are showCategory number of resulting
+  # ontology groups in DO and GOplot or throws error if there are none.
+  warnOntN(nrow(DOanalysis), nrow(GOanalysis), showCategory, type = "bar")
+  
   # plot GO and DO analysis
-  DOplot <- graphics::barplot(DOanalysis, showCategory)
-  GOplot <- graphics::barplot(GOanalysis, showCategory)
+  DOplot <- graphics::barplot(DOanalysis, showCategory = showCategory)
+  GOplot <- graphics::barplot(GOanalysis, showCategory = showCategory)
   
   # combine the data sets in the above two plots
   
   # first order the plot data by its p-value
-  DOplotData <- DOplot$data[order(DOplot$data$p.adjust), ]
-  GOplotData <- GOplot$data[order(GOplot$data$p.adjust), ]
+  DOpData <- DOplot$data[order(DOplot$data$p.adjust), ]
+  GOpData <- GOplot$data[order(GOplot$data$p.adjust), ]
   
-  # second give each of them a column rank that numbers the data by its p-value
-  DOplotData$pRank <- seq(1, length.out = nrow(DOplotData))
-  GOplotData$pRank <- seq(1, length.out = nrow(GOplotData))
+  # second give each of them a column rank
+  # that numbers the data by its p-value
+  DOpData$pRank <- seq(1, length.out = nrow(DOpData))
+  GOpData$pRank <- seq(1, length.out = nrow(GOpData))
   
   # combind the two dataframes in alternating order
-  DGOplotData <- rbind(DOplotData, GOplotData)
-  DGOplotData <- DGOplotData[order(DGOplotData$pRank, DGOplotData$ID), ]
+  DGOpData <- rbind(DOpData, GOpData)
+  DGOpData <- DGOpData[order(DGOpData$pRank, DGOpData$ID), ]
   
   
   # Now have to make "groups" to make a double bar plot of DO and GO analysis.
   
   # ontology type
-  ont <- substr(DGOplotData$ID, 1, 2)
+  ont <- substr(DGOpData$ID, 1, 2)
   
   # ontology term combine by rank or p.adjust
-  numDO <- nrow(DOplotData)
-  numGO <- nrow(GOplotData)
+  numDO <- nrow(DOpData)
+  numGO <- nrow(GOpData)
   
-  numGroups <- min(numDO, numGO) + abs(numDO - numGO) # to account for the difference of analysis results
+  numGroups <- 2*min(numDO, numGO) + abs(numDO - numGO) # to account for the difference of analysis results
   
   # denote the groups by term
   term <- character(numGroups)
   
   # indices of DGOplotData to combine GO and DO terms for grouping
-  iterGroups = c(seq(1, by = 2, length.out = min(numDO, numGO)), 
-                 seq((2 * min(numDO, numGO) + 1), nrow(DGOplotData)))
-  
+  iterGroups = c(seq(1, by = 2, length.out = min(numDO, numGO)))
+  if (min(numDO, numGO) < showCategory ){
+    iterGroups <- c(iterGroups, seq((2 * min(numDO, numGO) + 1), nrow(DGOpData)))
+  }
   # iterate DGOplotData to store groups in term:
   # one term for each ontology group
-  iterTerm <- 1
+  iTerm <- 1
   for (i in iterGroups) {
-    if (i <= min(numDO, numGO) * 2) {
-      term[c(iterTerm, iterTerm + 1)] <- paste(DGOplotData$Description[i], "\n", DGOplotData$Description[i + 1])
-      iterTerm <- iterTerm + 2
+    if (i <= 2*min(numDO, numGO)) {
+      term[c(iTerm, iTerm + 1)] <- paste(DGOpData$Description[i+1], 
+                                         "\n", 
+                                         DGOpData$Description[i])
+      iTerm <- iTerm + 2
     }else {
-      term[iterTerm] <- paste(DGOplotData$Description[i])
-      iterTerm <- iterTerm + 1
+      term[iTerm] <- paste(DGOpData$Description[i])
+      iTerm <- iTerm + 1
     }
   }
   
   # combine all to one data frame for plotting a double bar graph
-  doubleBarplotData <- data.frame(ont, term, DGOplotData$Count, DGOplotData$p.adjust, DGOplotData$pRank)
-  names(doubleBarplotData) <- c("ont", "term", "count", "p.adjust","pRank")
+  dblBarData <- data.frame(ont, term, 
+                           DGOpData$Count, 
+                           DGOpData$p.adjust, 
+                           DGOpData$pRank)
+  names(dblBarData) <- c("ont", "term", "count", "p.adjust","pRank")
   
   # plot a double bar graph; group by "ont" and fill by p.adjust value
   # below is inspired by teunbrand 
   # https://stackoverflow.com/questions/57613428/grouping-scale-fill-gradient-continuous-grouped-bar-chart
-  doubleBarplot <- ggplot2::ggplot(doubleBarplotData, ggplot2::aes(x=stats::reorder(term, -pRank), y=count)) +
-    ggplot2::geom_bar(stat="identity", ggplot2::aes(col=ont, group=ont, fill=p.adjust), position="dodge") +
-    ggplot2::ylim(0, max(doubleBarplotData$count) + 0.6) + ggplot2::xlab("") + 
-    ggplot2::scale_fill_continuous() + 
-    ggplot2::coord_flip()
+  dblBarplot <- ggplot2::ggplot(dblBarData, 
+                                ggplot2::aes(x=stats::reorder(term, -pRank), y=count)) +
+                ggplot2::geom_bar(stat="identity", 
+                                  ggplot2::aes(col=ont, group=ont, fill=p.adjust), 
+                                  position="dodge") +
+                ggplot2::ylim(0, max(dblBarData$count) + 0.6) + 
+                ggplot2::xlab("") + 
+                ggplot2::scale_fill_continuous() + 
+                ggplot2::coord_flip()
   
   # take coordinates of layer data of doubleBarplot and match them back to the original data.
-  ldDG <- ggplot2::layer_data(doubleBarplot)
+  ldDG <- ggplot2::layer_data(dblBarplot)
   ldDG <- ldDG[, c("xmin", "xmax", "ymin", "ymax")]
   
-  matches <- seq(12, 1)
+  matches <- seq(nrow(dblBarData), 1)
   
-  ldDG$p.adjust <- doubleBarplotData$p.adjust[matches]
-  ldDG$term <- doubleBarplotData$term[matches]
-  ldDG$ont <- doubleBarplotData$ont[matches]
+  ldDG$p.adjust <- dblBarData$p.adjust[matches]
+  ldDG$term <- dblBarData$term[matches]
+  ldDG$ont <- dblBarData$ont[matches]
+  
+  # now for the color scheme of DO and GO
+  if (DOcol == "red" && GOcol == "blue") {
+    colHighD <- "darksalmon"
+    colLowD <- "red"
+    colHighG <- "lightskyblue"
+    colLowG <- "blue"
+  } else {
+    colHighD <- DOcol[1]
+    colLowD <- DOcol[2]
+    colHighG <- GOcol[1]
+    colLowG <- GOcol[2]
+  }
+  
   
   # make a new plot with geom_rect as layers; 1 for DO and 1 for GO.
-  doublePlot <- ggplot2::ggplot(mapping=ggplot2::aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)) + 
+  ggplot2::ggplot(mapping=ggplot2::aes(xmin=xmin, xmax=xmax, 
+                                       ymin=ymin, ymax=ymax)) + 
     ggplot2::geom_rect(data=ldDG[ldDG$ont=="GO", ], ggplot2::aes(fill=p.adjust)) +
-    ggplot2::scale_fill_gradient(low='blue', high='lightskyblue1',
-                        limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "GO"])),
-                        name="GO p.adjust") +
+    ggplot2::scale_fill_gradient(low=colLowG, high=colHighG,
+                                 limits=c(min(ldDG$p.adjust), 
+                                          max(ldDG$p.adjust[ldDG$ont == "GO"])),
+                                 name="GO p.adjust") +
     ggnewscale::new_scale_fill() +
     ggplot2::geom_rect(data=ldDG[ldDG$ont=="DO", ], ggplot2::aes(fill=p.adjust)) +
-    ggplot2::scale_fill_gradient(low='red', high='darksalmon',
-                        limits=c(min(ldDG$p.adjust), max(ldDG$p.adjust[ldDG$ont == "DO"])),
-                        name="DO p.adjust") +
-    ggplot2::scale_x_continuous(breaks=seq_along(unique(doubleBarplotData$term)),
-                       labels=rev(unique(doubleBarplotData$term))) +
-    ggplot2::coord_flip()
-  
-  return (doublePlot)
+    ggplot2::scale_fill_gradient(low=colLowD, high=colHighD,
+                                 limits=c(min(ldDG$p.adjust), 
+                                          max(ldDG$p.adjust[ldDG$ont == "DO"])),
+                                 name="DO p.adjust") +
+    ggplot2::scale_x_continuous(breaks=seq_along(unique(dblBarData$term)),
+                                labels=rev(unique(dblBarData$term))) +
+    ggplot2::coord_flip() + 
+    ggplot2::ylab("Number of Genes") + 
+    ggplot2::ggtitle("DGO Enrichment Analysis")
   
 }

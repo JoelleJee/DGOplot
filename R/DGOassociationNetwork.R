@@ -18,123 +18,146 @@
 #' @import RColorBrewer
 #' @import igraph
 #' @import annotate
+#' @import graphics
 
-DGOnetplot <- function(DGOResult, showCategory = 5, pvalueCutoff = 0.05) {
+DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
+  
+  # check input for error
+  checkInput(DGOResult)
+  
+  if (showCategory > 6) {
+    stop("showCategory must be 6 or less.")
+  }
   
   # combine the first showCategory number of groups from DO and GO analysis 
-  DONumCategory <- min(showCategory, sum(DGOResult[[1]]@result$p.adjust < pvalueCutoff))
-  GONumCategory <- min(showCategory, sum(DGOResult[[2]]@result$p.adjust < pvalueCutoff))
-  dataToPlot <- rbind(DGOResult[[1]]@result[1:DONumCategory, ], DGOResult[[2]]@result[1:GONumCategory, ])
+  DOcatN <- min(showCategory, 
+                       sum(DGOResult[["DO"]]@result$p.adjust < pvalueCutoff))
+  GOcatN <- min(showCategory, 
+                       sum(DGOResult[["GO"]]@result$p.adjust < pvalueCutoff))
+  plotDat <- rbind(DGOResult[["DO"]]@result[1:DOcatN, ], 
+                      DGOResult[["GO"]]@result[1:GOcatN, ])
+  
+  # check if there are at least showCategory number of valid 
+  # (p.adjust value less than pvalueCutoff) ontology groups
+  # if not, produce warning message, or throw an error and stop if 0 groups.
+  warnOntN(DOcatN, GOcatN, showCategory, type = "net")
+
   
   # get all the geneIDs for each ontology group
-  numGroups <- nrow(dataToPlot)
+  numGroups <- nrow(plotDat)
   geneID <- c(numGroups)
   for (i in seq(numGroups)) {
-    geneIDs <- strsplit(dataToPlot$geneID[i], "/")
+    geneIDs <- strsplit(plotDat$geneID[i], "/")
     geneID[i] <- geneIDs
   }
   
-  # repeat the term name and p.adjust value by the number of counts to combine with the geneIDs later 
+  # repeat the term name and p.adjust value by the number 
+  # of counts to combine with the geneIDs later 
   term <- list()
   pValue <- list()
   for (i in seq(numGroups)) {
-    term[[i]] <- rep(dataToPlot$Description[i], dataToPlot$Count[i])
-    pValue[[i]] <- rep(dataToPlot$p.adjust[i], dataToPlot$Count[i])
+    term[[i]] <- rep(plotDat$Description[i], plotDat$Count[i])
+    pValue[[i]] <- rep(plotDat$p.adjust[i], plotDat$Count[i])
   }
   
   # combine the term and geneIDs into one data frame
-  termGeneCombined <- data.frame(matrix(ncol = 3, nrow = 0))
-  colnames(termGeneCombined) <- c("Description", "Gene", "p.adjust")
+  termGene <- data.frame(matrix(ncol = 3, nrow = 0))
+  colnames(termGene) <- c("Description", "Gene", "p.adjust")
   for (i in seq(numGroups)){
     geneNames <- annotate::getSYMBOL(geneID[[i]], data = "org.Hs.eg")
-    termGeneCombined <- rbind(termGeneCombined, data.frame("Description" = term[[i]],
-                                                           "Gene" = geneNames,
-                                                           "p.adjust" = pValue[[i]]))
+    termGene <- rbind(termGene, 
+                      data.frame("Description" = term[[i]],
+                                 "Gene" = geneNames,
+                                 "p.adjust" = pValue[[i]]))
   }
   
-  graphNet <- igraph::graph.data.frame(termGeneCombined, directed=FALSE)
+  graphNet <- igraph::graph.data.frame(termGene, directed=FALSE)
   
   
   # set the size of gene nodes to be uniform
-  numGenes <- length(V(graphNet)) - numGroups           # number of nodes - number of ontology groups
-  geneNodeSize <- seq(3, 3, length.out = numGenes)
+  # number of nodes = number of ontology groups
+  numGenes <- length(igraph::V(graphNet)) - numGroups         
+  geneSize <- seq(3, 3, length.out = numGenes)
   
   # set the size of nodes ontology groups proportion to the count
-  termNodeSize <- dataToPlot$Count*0.9
+  termSize <- plotDat$Count*0.9
   
   # set the node size
-  igraph::V(graphNet)$size <- c(termNodeSize, geneNodeSize)
+  igraph::V(graphNet)$size <- c(termSize, geneSize)
   
   # remove the labels on the terms nodes
   termLabel <- rep("", numGroups)
-  geneNames <- igraph::V(graphNet)$name[(numGroups + 1):length(V(graphNet))]
+  geneNames <- igraph::V(graphNet)$name[(numGroups + 1):
+                                          length(igraph::V(graphNet))]
   
   igraph::V(graphNet)$label <- c(termLabel, geneNames)
   
   # set color for nodes
-  termColor <- RColorBrewer::brewer.pal(numGroups, "PuOr")
-  geneColor <- rep("honeydew3", numGenes)
+  termCol <- RColorBrewer::brewer.pal(numGroups, "PuOr")
+  geneCol <- rep("honeydew3", numGenes)
   
-  igraph::V(graphNet)$color <- c(termColor, geneColor)
+  igraph::V(graphNet)$color <- c(termCol, geneCol)
   
-  # set color for edges: give the edges a gradient according to their p.adjust value
+  # set color for edges: give the edges a gradient
+  # according to their p.adjust value
   
   # find unique p.adjust values and give them a rank
-  padjustVals <- unique(dataToPlot$p.adjust)
-  pRanks <- order(padjustVals)
+  padjVals <- unique(plotDat$p.adjust)
+  pRanks <- order(padjVals)
   
-  # Now make a gradient of blue and red, each with the number of unique p.adjust values of colors
-  # blue for GO
+  # Now make a gradient of blue and red, each with the 
+  # number of unique p.adjust values of colors blue for GO
   GOcolfunc <- grDevices::colorRampPalette(c("blue", "lightblue"))
-  GOColors <- GOcolfunc(length(padjustVals))
+  GOCols <- GOcolfunc(length(padjVals))
   
   # red for DO
   DOcolfunc <- grDevices::colorRampPalette(c("red", "mistyrose"))
-  DOColors <- DOcolfunc(length(padjustVals))
+  DOCols <- DOcolfunc(length(padjVals))
   
   # Now assign each gene with a color that's appropriate with its p.adjust value 
   
-  DOEdgeColors <- c()
+  DOEdgeCols <- c()
   
   j <- 1 # to iterate through padjustVals
   
-  for (i in seq(DONumCategory)){
-    if (dataToPlot$p.adjust[i] == padjustVals[j]) {
-      edgeColor <- DOColors[pRanks[j]]
+  for (i in seq(DOcatN)){
+    if (plotDat$p.adjust[i] == padjVals[j]) {
+      edgeCol <- DOCols[pRanks[j]]
       j <- j + 1
     } else {
-      edgeColor <- DOColors[pRanks[j - 1]]
+      edgeCol <- DOCols[pRanks[j - 1]]
     }
-    DOEdgeColors <- c(DOEdgeColors, rep(edgeColor, dataToPlot$Count[i]))
+    DOEdgeCols <- c(DOEdgeCols, rep(edgeCol, plotDat$Count[i]))
   }
   
-  GOEdgeColors <- c()
+  GOEdgeCols <- c()
   
-  for (i in seq(DONumCategory + 1, numGroups)){
-    if (dataToPlot$p.adjust[i] == padjustVals[j]) {
-      edgeColor <- GOColors[pRanks[j]]
-      j <- min(length(padjustVals), j + 1)
+  for (i in seq(DOcatN + 1, numGroups)){
+    if (plotDat$p.adjust[i] == padjVals[j]) {
+      edgeCol <- GOCols[pRanks[j]]
+      j <- min(length(padjVals), j + 1)
     } else {
-      edgeColor <- GOColors[pRanks[j - 1]]
+      edgeCol <- GOCols[pRanks[j - 1]]
     }
-    GOEdgeColors <- c(GOEdgeColors, rep(edgeColor, dataToPlot$Count[i]))
+    GOEdgeCols <- c(GOEdgeCols, rep(edgeCol, plotDat$Count[i]))
   }
   
   # set the edge colors
-  igraph::E(graphNet)$color <- c(DOEdgeColors, GOEdgeColors)
+  igraph::E(graphNet)$color <- c(DOEdgeCols, GOEdgeCols)
   
-  # png("GeneAssociationNetwork.png", 1200, 1200)
-  
-  # Finally plot the result and return it
+  # Finally plot the result
+  par(bg = "gray60")
   graphics::plot(graphNet,
                  vertex.label.font.cex = 1,
                  vertex.label.degree = pi/2,
                  vertex.label.dist = 0.5,
-                 vertex.label.color = "grey0",
-                 layout=layout.by.attr(graphNet, wc=1))
+                 vertex.label.color = "black",
+                 layout=layout.by.attr(graphNet, wc=1, cluster.strength = 50),
+                 bg = 244)
   
   # Now add a legend for the ontology groups
-  graphics::legend(x=1.5, y=0.5, dataToPlot$Description, pch=21, col = termColor,
-                   pt.bg=termColor, pt.cex=2, cex=.8, bty="n", ncol=1)
+  graphics::legend(x=1.2, y=0.5, plotDat$Description, pch=21, col = termCol,
+                   pt.bg=termCol, cex = 0.9, pt.cex=2, bty="n", ncol=1)
+  graphics::title(main = "Gene Association Network")
   
 }

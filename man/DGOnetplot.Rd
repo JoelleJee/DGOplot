@@ -4,7 +4,7 @@
 \alias{DGOnetplot}
 \title{Draw a gene association network of DO and GO enrichment analyses results.}
 \usage{
-DGOnetplot(DGOResult, showCategory = 5, pvalueCutoff = 0.05)
+DGOnetplot(DGOResult, showCategory = 6, pvalueCutoff = 0.05)
 }
 \arguments{
 \item{DGOResult}{DO and GO enrichment analysis result returned from enrichDGO().}

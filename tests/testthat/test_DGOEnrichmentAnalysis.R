@@ -10,13 +10,7 @@ context("DGOEnrichmentAnalysis")
 
 #
 
-
-
 data(geneList)  # load data from DOSE package
-gene <- names(geneList)[abs(geneList) > 2]
-
-
-
 
 
 #
@@ -24,10 +18,7 @@ gene <- names(geneList)[abs(geneList) > 2]
 # ==== END SETUP AND PREPARE ===================================================
 
 
-data(geneList)
-
 gene <- names(geneList)[abs(geneList) > 2]
-
 DGOResult <- enrichDGO(gene, universe = names(geneList))
 
 DOanalysis <- DGOResult[["DO"]]
@@ -37,6 +28,7 @@ test_that("corrupt input generates errors",  {
   
   expect_error(enrichDGO(c(), universe = names(geneList)),
                "The input should be a vector of gene IDs with a fold change")
+  
   
 })
 

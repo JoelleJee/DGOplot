@@ -4,12 +4,16 @@
 \alias{DGObarplot}
 \title{Draw a bar graph on the DO and GO analysis.}
 \usage{
-DGObarplot(DGOResult, showCategory = 8)
+DGObarplot(DGOResult, showCategory = 8, DOcol = "red", GOcol = "blue")
 }
 \arguments{
 \item{DGOResult}{DO and GO enrichment analysis result returned from enrichDGO().}
 
 \item{showCategory}{number of ontology groups to show from DO and GO each.}
+
+\item{DOcol}{color to use for plotting DO (default is red)}
+
+\item{GOcol}{color to use for plotting GO (default is blue)}
 }
 \value{
 Returns a double bar graph of DO and GO analysis.
