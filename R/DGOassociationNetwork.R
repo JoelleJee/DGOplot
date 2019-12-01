@@ -147,7 +147,7 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
   
   # Finally plot the result
   dev.off()
-  opar <- par()
+  opar <- par(no.readonly = TRUE)
   par(bg = "gray60",
       oma = c(0,0,0,9),
       mar = c(1,1,1,1))
@@ -159,14 +159,14 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
                  vertex.label.color = "black",
                  layout=coords,
                  bg = 244)
-  lgnd <- makeLegend(plotDat$Description)
+  
   # reset margins to add legend
   par(opar)
   par(mar = c(0,0,0,0),
-      omar = c(0,0,0,4))
+      oma = c(0,0,0,0))
+  lgnd <- makeLegend(plotDat$Description)
   graphics::legend(x=0.75, y=0.9, lgnd, pch=21, col = termCol,
                    pt.bg=termCol, cex = 0.9, pt.cex=2, bty="n", ncol=1)
-  par(opar)
   par(mar = c(0,0,3,0))
   graphics::title(main = "Gene Association Network",
                   cex.main = 1.5)
