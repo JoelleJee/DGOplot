@@ -1,0 +1,95 @@
+---
+title: "Introduction_DGOplot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction_DGOplot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+library(knitr)
+opts_chunk$set(fig.align = "center", 
+               out.width = "90%",
+               fig.width = 6, fig.height = 5.5,
+               dev.args=list(pointsize=10),
+               par = TRUE, # needed for setting hook 
+               collapse = TRUE, # collapse input & ouput code in chunks
+               warning = FALSE)
+
+knit_hooks$set(par = function(before, options, envir)
+  { if(before && options$fig.show != "none") 
+       par(family = "sans", mar=c(4.1,4.1,1.1,1.1), mgp=c(3,1,0), tcl=-0.5)
+})
+set.seed(1) # for exact reproducibility
+```
+
+# Introduction
+
+**DGOplot** is a contributed R package for performing Disease Ontology (DO) and Gene Ontology (GO) enrichment analyses and plotting the results. It provide a functions for combined DO and GO enrichment analyses on high-throughput Human Gene data based on R package DOSE and clusterProfiler. This package depends on [clusterProfiler](https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html) and [DOSE](https://bioconductor.org/packages/release/bioc/html/DOSE.html) for enrichment analyses. Also included are functions that allows visualization of such enrichment results into a barplot and to a gene association network. 
+
+This document gives a quick tour of **DGOplot** (version `r packageVersion("DGOplot")`) functionalities. It was written in R Markdown, using the [knitr](https://cran.r-project.org/package=knitr) package for production and [mclust](https://cran.r-project.org/web/packages/mclust/index.html) vignette format.
+
+See `help(package="DGOplot")` for further details and references provided by `citation("DGOplot")`. We will be using the dataset geneLIst provided by the DOSE package to demonstrate the functionalities of **DOSE**. geneList is named vector of gene expression levels and gene entrez id.
+
+```{r, message = FALSE, echo=-2}
+library(DGOplot)
+```
+
+# DO and GO Enrichment Analysis
+
+```{r}
+library(DOSE)
+data(geneList)
+head(geneList)
+gene <- names(geneList)[abs(geneList) > 2]
+head(geneList)
+DGOResult <- enrichDGO(gene, 
+                       universe=names(geneList),
+                       pvalueCutoff = 0.5)
+head(DGOResult)
+```
+
+## Barplot
+
+```{r, echo = TRUE, warning=TRUE}
+DGObarplot(DGOResult)
+DGObarplot(DGOResult, showCategory = 4)
+DGObarplot(DGOResult, 
+           showCategory = 4,
+           DOcol = c("yellow", "green"),
+           GOcol = c("blue", "purple"))
+```
+
+Warnings are generated when the available number of groups for each ontology enrichment results are smaller than the showCategory value given.
+
+## Gene Association Network
+
+Visualization of gene association to the ontology groups. Layout is adapted from [ahmohamed](https://stackoverflow.com/questions/28715736/how-to-spread-out-community-graph-made-by-using-igraph-package-in-r/28722680#28722680) on gitHub.
+
+```{r, echo = TRUE, warning=TRUE}
+net <- DGOnetplot(DGOResult)
+net()
+net <- DGOnetplot(DGOResult, showCategory = 5)
+net()
+net <- DGOnetplot(DGOResult, pvalueCutoff = 0.05)
+net()
+```
+
+Warnings are generated when the available number of groups for each ontology enrichment results are smaller than the showCategory value given. The color of the ontology nodes are produced by `RColorBrewer::brewer.pal(numGroups, "PuOr")`. 
+
+# References
+
+Scrucca L., Fop M., Murphy T. B. and Raftery A. E. (2016) mclust 5: clustering, classification and density estimation using Gaussian finite mixture models, *The R Journal*, 8/1, pp. 205-233. https://journal.r-project.org/archive/2016/RJ-2016-021/RJ-2016-021.pdf
+
+Yu G, Wang L, Yan G, He Q (2015). “DOSE: an R/Bioconductor package for Disease Ontology Semantic and Enrichment analysis.” *Bioinformatics*, 31(4), 608-609. doi: 10.1093/bioinformatics/btu684, http://bioinformatics.oxfordjournals.org/content/31/4/608.
+        
+Yu G, Wang L, Han Y, He Q (2012). “clusterProfiler: an R package for comparing biological themes among gene clusters.” *OMICS: A Journal of Integrative Biology*, 16(5), 284-287. doi: 10.1089/omi.2011.0118. 
+
+ahmohamed (2015, Mar 3). "How to spread out community graph made by using igraph package in R." In *Stack Overflow.* Retrieved 23:37, December 1, 2019, from https://stackoverflow.com/questions/28715736/how-to-spread-out-community-graph-made-by-using-igraph-package-in-r/28722680#28722680.
+
+----
+
+```{r}
+sessionInfo()
+```
