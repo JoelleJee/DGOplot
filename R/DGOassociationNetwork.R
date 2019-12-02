@@ -5,6 +5,7 @@
 #' @param DGOResult DO and GO enrichment analysis result returned from enrichDGO().
 #' @param showCategory number of ontology groups to show from DO and GO each.
 #' @param pvalueCutoff p-value cutoff.
+#' @param cluster.strength clustering of each ontology group on the network graph
 #'
 #' @return Returns a gene association network of DO and GO analyses.
 #' \itemize{
@@ -20,7 +21,10 @@
 #' @import annotate
 #' @import graphics
 
-DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
+DGOnetplot <- function(DGOResult, 
+                       showCategory = 6, 
+                       pvalueCutoff = 0.05,
+                       cluster.strength = 10) {
   
   # check input for error
   checkInput(DGOResult)
@@ -153,7 +157,9 @@ DGOnetplot <- function(DGOResult, showCategory = 6, pvalueCutoff = 0.05) {
     par(bg = "gray60",
         oma = c(0,0,0,9),
         mar = c(0,0,0,0))
-    coords <- layout.by.attr(graphNet, wc=1, cluster.strength = 50)
+    coords <- netLayout(graphNet, 
+                             wc=1, 
+                             cluster.strength = cluster.strength)
     graphics::plot(graphNet,
                    vertex.label.font.cex = 1,
                    vertex.label.degree = pi/2,

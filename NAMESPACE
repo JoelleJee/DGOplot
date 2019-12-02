@@ -3,7 +3,6 @@
 export(DGObarplot)
 export(DGOnetplot)
 export(enrichDGO)
-export(layout.by.attr)
 import(BiocManager)
 import(RColorBrewer)
 import(annotate)
