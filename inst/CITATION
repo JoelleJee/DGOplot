@@ -1,0 +1,15 @@
+citHeader("To cite DGOplot in publications use:")
+
+citEntry(
+  entry    = "Unpublished",
+  title    = "DGOplot - visualizing Disease Ontology and Gene Ontology enrichment analyses in one",
+  author   = "Yoonsun Jee",
+  note     = "Unpublished",
+  year     = "2019",
+  url      = "https://github.com/JoelleJee/DGOplot"
+  textVersion = paste(author, 
+                      " (", year, "). "
+                      "\"", title, ".\"",
+                      "Retrieved from ", url, "."
+  )
+)
