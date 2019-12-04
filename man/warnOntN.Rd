@@ -4,7 +4,7 @@
 \alias{warnOntN}
 \title{Warning or Error generation for the number of ontology groups input.}
 \usage{
-warnOntN(nDO, nGO, showCategory, type)
+warnOntN(nDO, nGO, showCategory)
 }
 \arguments{
 \item{nDO}{number of DO enrichment result groups}
