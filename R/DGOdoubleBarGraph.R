@@ -5,8 +5,9 @@
 #' 
 #' @param DGOResult DO and GO enrichment analysis result returned from enrichDGO().
 #' @param showCategory number of ontology groups to show from DO and GO each.
-#' @param DOcol color to use for plotting DO (default is red)
-#' @param GOcol color to use for plotting GO (default is blue)
+#' @param DOcol color to use for plotting DO.
+#' @param GOcol color to use for plotting GO.
+#' @param pAdjustCutoff p.adjust cutoff value for ontology group to plot.
 #'
 #' @return Returns a double bar graph of DO and GO analysis.
 #' \itemize{
@@ -23,26 +24,47 @@
 
 
 DGObarplot <- function(DGOResult, showCategory = 8, 
-                       DOcol = "red", GOcol = "blue") {
+                       DOcol = "red", GOcol = "blue",
+                       pAdjustCutoff = 0.05) {
   
   checkInput(DGOResult)
   
   DOanalysis <- DGOResult[["DO"]]
   GOanalysis <- DGOResult[["GO"]]
   
+  # now adjust the pvalueCutoff value in 
+  # both DOanalysis and GOanalysis to user input value
+  GOanalysis@pvalueCutoff <- pAdjustCutoff
+  DOanalysis@pvalueCutoff <- pAdjustCutoff
+  
   # warning message if there are showCategory number of resulting
   # ontology groups in DO and GOplot or throws error if there are none.
-  warnOntN(nrow(DOanalysis), nrow(GOanalysis), showCategory, type = "bar")
+  nGO = sum(GOanalysis@result$p.adjust <= pAdjustCutoff)
+  nDO = sum(DOanalysis@result$p.adjust <= pAdjustCutoff)
+  warnOntN(nDO, nGO, showCategory)
   
   # plot GO and DO analysis
-  DOplot <- graphics::barplot(DOanalysis, showCategory = showCategory)
-  GOplot <- graphics::barplot(GOanalysis, showCategory = showCategory)
+  # if there are no ontology groups below pAdjustCutoff
+  # just return one of the above graphs
+  if (nGO == 0) {
+    DOplot <- graphics::barplot(DOanalysis) +
+              ggplot2::ylab("Number of Genes") + 
+              ggplot2::ggtitle("DO Enrichment Plot")
+    return(DOplot)
+  } else if (nDO == 0) {
+    GOplot <- graphics::barplot(GOanalysis) +
+              ggplot2::ylab("Number of Genes") + 
+              ggplot2::ggtitle("GO Enrichment Plot") 
+    return(GOplot)
+  }
+  
   
   # combine the data sets in the above two plots
-  
   # first order the plot data by its p-value
-  DOpData <- DOplot$data[order(DOplot$data$p.adjust), ]
-  GOpData <- GOplot$data[order(GOplot$data$p.adjust), ]
+  DOpData <- DOanalysis@result[order(DOanalysis@result$p.adjust), ]
+  DOpData <- DOpData[1:min(showCategory, nDO), ]
+  GOpData <- GOanalysis@result[order(GOanalysis@result$p.adjust), ]
+  GOpData <- GOpData[1:min(showCategory, nGO), ]
   
   # second give each of them a column rank
   # that numbers the data by its p-value
@@ -150,6 +172,6 @@ DGObarplot <- function(DGOResult, showCategory = 8,
                                 labels=rev(unique(dblBarData$term))) +
     ggplot2::coord_flip() + 
     ggplot2::ylab("Number of Genes") + 
-    ggplot2::ggtitle("DGO Enrichment Analysis")
+    ggplot2::ggtitle("DGO Enrichment Plot")
   
 }

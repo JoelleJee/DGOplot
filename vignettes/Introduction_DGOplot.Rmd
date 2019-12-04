@@ -65,15 +65,12 @@ Warnings are generated when the available number of groups for each ontology enr
 
 ## Gene Association Network
 
-Visualization of gene association to the ontology groups. Layout is adapted from [ahmohamed](https://stackoverflow.com/questions/28715736/how-to-spread-out-community-graph-made-by-using-igraph-package-in-r/28722680#28722680) on gitHub.
+Visualization of gene association to the ontology groups. Layout is adapted from [ahmohamed](https://stackoverflow.com/questions/28715736/how-to-spread-out-community-graph-made-by-using-igraph-package-in-r/28722680#28722680) on gitHub. Color of the nodes and edges can be changed; see
 
 ```{r, echo = TRUE, warning=TRUE}
-net <- DGOnetplot(DGOResult)
-net()
-net <- DGOnetplot(DGOResult, showCategory = 5)
-net()
-net <- DGOnetplot(DGOResult, pvalueCutoff = 0.05)
-net()
+DGOnetplot(DGOResult)
+DGOnetplot(DGOResult, showCategory = 5)
+DGOnetplot(DGOResult, pvalueCutoff = 0.05)
 ```
 
 Warnings are generated when the available number of groups for each ontology enrichment results are smaller than the showCategory value given. The color of the ontology nodes are produced by `RColorBrewer::brewer.pal(numGroups, "PuOr")`. 

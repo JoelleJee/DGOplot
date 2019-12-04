@@ -8,7 +8,11 @@ DGOnetplot(
   DGOResult,
   showCategory = 6,
   pvalueCutoff = 0.05,
-  cluster.strength = 10
+  cluster.strength = 10,
+  GOcol = c("blue", "lightblue"),
+  DOcol = c("red", "mistyrose"),
+  termCol = "PuOr",
+  geneCol = "honeydew3"
 )
 }
 \arguments{
@@ -18,7 +22,15 @@ DGOnetplot(
 
 \item{pvalueCutoff}{p-value cutoff.}
 
-\item{cluster.strength}{clustering of each ontology group on the network graph}
+\item{cluster.strength}{clustering strength of each ontology group on the network graph}
+
+\item{GOcol}{vector of colors for gradient GO edges}
+
+\item{DOcol}{vector of colors for gradient DO edges}
+
+\item{termCol}{name of ColorBrewer color palettes for ontology term nodes}
+
+\item{geneCol}{color of gene nodes}
 }
 \value{
 Returns a gene association network of DO and GO analyses.

@@ -5,7 +5,11 @@
 #' @param DGOResult DO and GO enrichment analysis result returned from enrichDGO().
 #' @param showCategory number of ontology groups to show from DO and GO each.
 #' @param pvalueCutoff p-value cutoff.
-#' @param cluster.strength clustering of each ontology group on the network graph
+#' @param cluster.strength clustering strength of each ontology group on the network graph
+#' @param GOcol vector of colors for gradient GO edges
+#' @param DOcol vector of colors for gradient DO edges
+#' @param termCol name of ColorBrewer color palettes for ontology term nodes
+#' @param geneCol color of gene nodes
 #'
 #' @return Returns a gene association network of DO and GO analyses.
 #' \itemize{
@@ -24,7 +28,11 @@
 DGOnetplot <- function(DGOResult, 
                        showCategory = 6, 
                        pvalueCutoff = 0.05,
-                       cluster.strength = 10) {
+                       cluster.strength = 10,
+                       GOcol = c("blue", "lightblue"),
+                       DOcol = c("red", "mistyrose"),
+                       termCol = "PuOr",
+                       geneCol = "honeydew3") {
   
   # check input for error
   checkInput(DGOResult)
@@ -33,18 +41,23 @@ DGOnetplot <- function(DGOResult,
     stop("showCategory must be 6 or less.")
   }
   
-  # combine the first showCategory number of groups from DO and GO analysis 
-  DOcatN <- min(showCategory, 
-                sum(DGOResult[["DO"]]@result$p.adjust < pvalueCutoff))
-  GOcatN <- min(showCategory, 
-                sum(DGOResult[["GO"]]@result$p.adjust < pvalueCutoff))
-  plotDat <- rbind(DGOResult[["DO"]]@result[1:DOcatN, ], 
-                   DGOResult[["GO"]]@result[1:GOcatN, ])
-  
   # check if there are at least showCategory number of valid 
   # (p.adjust value less than pvalueCutoff) ontology groups
   # if not, produce warning message, or throw an error and stop if 0 groups.
-  warnOntN(DOcatN, GOcatN, showCategory, type = "net")
+  DOResult <- DGOResult[["DO"]]@result
+  GOResult <- DGOResult[["GO"]]@result
+  DOcatN <- min(showCategory, 
+                sum(DOResult$p.adjust < pvalueCutoff))
+  GOcatN <- min(showCategory, 
+                sum(GOResult$p.adjust < pvalueCutoff))
+  # produce warning message is insufficient number 
+  # of goups found.
+  warnOntN(DOcatN, GOcatN, showCategory)
+  
+  # combine the first showCategory number of groups from DO and GO analysis 
+  plotDat <- rbind(DOResult[0:DOcatN, ], 
+                   GOResult[0:GOcatN, ])
+  
   
   
   # get all the geneIDs for each ontology group
@@ -97,8 +110,8 @@ DGOnetplot <- function(DGOResult,
   igraph::V(graphNet)$label <- c(termLabel, geneNames)
   
   # set color for nodes
-  termCol <- RColorBrewer::brewer.pal(numGroups, "PuOr")
-  geneCol <- rep("honeydew3", numGenes)
+  termCol <- RColorBrewer::brewer.pal(numGroups, termCol)
+  geneCol <- rep(geneCol, numGenes)
   
   igraph::V(graphNet)$color <- c(termCol, geneCol)
   
@@ -111,11 +124,11 @@ DGOnetplot <- function(DGOResult,
   
   # Now make a gradient of blue and red, each with the 
   # number of unique p.adjust values of colors blue for GO
-  GOcolfunc <- grDevices::colorRampPalette(c("blue", "lightblue"))
+  GOcolfunc <- grDevices::colorRampPalette(GOcol)
   GOCols <- GOcolfunc(length(padjVals))
   
   # red for DO
-  DOcolfunc <- grDevices::colorRampPalette(c("red", "mistyrose"))
+  DOcolfunc <- grDevices::colorRampPalette(DOcol)
   DOCols <- DOcolfunc(length(padjVals))
   
   # Now assign each gene with a color that's appropriate with its p.adjust value 
@@ -123,61 +136,64 @@ DGOnetplot <- function(DGOResult,
   DOEdgeCols <- c()
   
   j <- 1 # to iterate through padjustVals
-  
-  for (i in seq(DOcatN)){
-    if (plotDat$p.adjust[i] == padjVals[j]) {
-      edgeCol <- DOCols[pRanks[j]]
-      j <- j + 1
-    } else {
-      edgeCol <- DOCols[pRanks[j - 1]]
+  if (DOcatN > 0) {
+    for (i in seq(DOcatN)){
+      if (DOcatN == 0) {
+        break()
+      }
+      if (plotDat$p.adjust[i] == padjVals[j]) {
+        edgeCol <- DOCols[pRanks[j]]
+        j <- j + 1
+      } else {
+        edgeCol <- DOCols[pRanks[j - 1]]
+      }
+      DOEdgeCols <- c(DOEdgeCols, rep(edgeCol, plotDat$Count[i]))
     }
-    DOEdgeCols <- c(DOEdgeCols, rep(edgeCol, plotDat$Count[i]))
-  }
-  
+  }  
   GOEdgeCols <- c()
   
-  for (i in seq(DOcatN + 1, numGroups)){
-    if (plotDat$p.adjust[i] == padjVals[j]) {
-      edgeCol <- GOCols[pRanks[j]]
-      j <- min(length(padjVals), j + 1)
-    } else {
-      edgeCol <- GOCols[pRanks[j - 1]]
+  if (GOcatN > 0) {
+    for (i in seq(DOcatN + 1, numGroups)){
+      if (plotDat$p.adjust[i] == padjVals[j]) {
+        edgeCol <- GOCols[pRanks[j]]
+        j <- min(length(padjVals), j + 1)
+      } else {
+        edgeCol <- GOCols[pRanks[j - 1]]
+      }
+      GOEdgeCols <- c(GOEdgeCols, rep(edgeCol, plotDat$Count[i]))
     }
-    GOEdgeCols <- c(GOEdgeCols, rep(edgeCol, plotDat$Count[i]))
-  }
-  
+  }  
   # set the edge colors
   igraph::E(graphNet)$color <- c(DOEdgeCols, GOEdgeCols)
   # make legend
   lgnd <- makeLegend(plotDat$Description)
   
   # Finally plot the result
-  net = function(){
-    opar <- par(no.readonly = TRUE)
-    par(bg = "gray60",
-        oma = c(0,0,0,9),
-        mar = c(0,0,0,0))
-    coords <- netLayout(graphNet, 
-                             wc=1, 
-                             cluster.strength = cluster.strength)
-    graphics::plot(graphNet,
-                   vertex.label.font.cex = 1,
-                   vertex.label.degree = pi/2,
-                   vertex.label.dist = 0.5,
-                   vertex.label.color = "black",
-                   layout=coords)
-    
-    # reset margins to add legend
-    par(opar)
-    par(mar = c(0,0,0,0),
-        oma = c(0,0,0,0.5))
-    graphics::legend(x=0.75, y=0.85,lgnd, pch=21, col = termCol,
-                     pt.bg=termCol, cex = 0.7, pt.cex=1.5, bty="n", ncol=1)
-    par(mar = c(0,0,3,0))
-    graphics::title(main = "Gene Association Network",
-                    cex.main = 1.5)
-  }  
-  return(net)
+  opar <- par(no.readonly = TRUE)
+  par(bg = "gray60",
+      oma = c(0,0,0,9),
+      mar = c(0,0,0,0))
+  coords <- netLayout(graphNet, 
+                      wc=1, 
+                      cluster.strength = cluster.strength)
+  graphics::plot(graphNet,
+                 vertex.label.font.cex = 1,
+                 vertex.label.degree = pi/2,
+                 vertex.label.dist = 0.5,
+                 vertex.label.color = "black",
+                 layout=coords)
+  
+  # reset margins to add legend
+  par(opar)
+  par(mar = c(0,0,0,0),
+      oma = c(0,0,0,0.5))
+  graphics::legend(x=0.75, y=0.85,lgnd, pch=21, col = termCol,
+                   pt.bg=termCol, cex = 0.7, pt.cex=1.5, bty="n", ncol=1)
+  par(mar = c(0,0,3,0))
+  graphics::title(main = "Gene Association Network",
+                  cex.main = 1.5)
+  
+  return(recordPlot())
   
 }
   
