@@ -7,7 +7,7 @@
 DGOnetplot(
   DGOResult,
   showCategory = 6,
-  pvalueCutoff = 0.05,
+  pAdjustCutoff = 0.05,
   cluster.strength = 10,
   GOcol = c("blue", "lightblue"),
   DOcol = c("red", "mistyrose"),
@@ -20,7 +20,7 @@ DGOnetplot(
 
 \item{showCategory}{number of ontology groups to show from DO and GO each.}
 
-\item{pvalueCutoff}{p-value cutoff.}
+\item{pAdjustCutoff}{p-value cutoff.}
 
 \item{cluster.strength}{clustering strength of each ontology group on the network graph}
 

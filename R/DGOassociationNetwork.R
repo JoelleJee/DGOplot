@@ -4,7 +4,7 @@
 #' 
 #' @param DGOResult DO and GO enrichment analysis result returned from enrichDGO().
 #' @param showCategory number of ontology groups to show from DO and GO each.
-#' @param pvalueCutoff p-value cutoff.
+#' @param pAdjustCutoff p-value cutoff.
 #' @param cluster.strength clustering strength of each ontology group on the network graph
 #' @param GOcol vector of colors for gradient GO edges
 #' @param DOcol vector of colors for gradient DO edges
@@ -27,29 +27,30 @@
 
 DGOnetplot <- function(DGOResult, 
                        showCategory = 6, 
-                       pvalueCutoff = 0.05,
+                       pAdjustCutoff = 0.05,
                        cluster.strength = 10,
                        GOcol = c("blue", "lightblue"),
                        DOcol = c("red", "mistyrose"),
                        termCol = "PuOr",
                        geneCol = "honeydew3") {
   
+  # show Category must be > 2 for brewr.pal to work
+  if (showCategory < 2) {
+    stop("showCategory must be at least 2")
+  }
+  
   # check input for error
   checkInput(DGOResult)
   
-  if (showCategory > 6) {
-    stop("showCategory must be 6 or less.")
-  }
-  
   # check if there are at least showCategory number of valid 
-  # (p.adjust value less than pvalueCutoff) ontology groups
+  # (p.adjust value less than pAdjustCutoff) ontology groups
   # if not, produce warning message, or throw an error and stop if 0 groups.
   DOResult <- DGOResult[["DO"]]@result
   GOResult <- DGOResult[["GO"]]@result
   DOcatN <- min(showCategory, 
-                sum(DOResult$p.adjust < pvalueCutoff))
+                sum(DOResult$p.adjust < pAdjustCutoff))
   GOcatN <- min(showCategory, 
-                sum(GOResult$p.adjust < pvalueCutoff))
+                sum(GOResult$p.adjust < pAdjustCutoff))
   # produce warning message is insufficient number 
   # of goups found.
   warnOntN(DOcatN, GOcatN, showCategory)
@@ -58,10 +59,20 @@ DGOnetplot <- function(DGOResult,
   plotDat <- rbind(DOResult[0:DOcatN, ], 
                    GOResult[0:GOcatN, ])
   
-  
-  
   # get all the geneIDs for each ontology group
   numGroups <- nrow(plotDat)
+  
+  # set term node color
+  termCol <- try(RColorBrewer::brewer.pal(numGroups, termCol), 
+                 silent = TRUE)
+  
+  # number of Groups cannot exceed the the max value of 
+  # parameter n in brewer.pal(n, color)
+  if (length(termCol) < numGroups) {
+    numGroups <- length(termCol)
+    plotDat <- plotDat[1:numGroups, ]
+  }
+  
   geneID <- c(numGroups)
   for (i in seq(numGroups)) {
     geneIDs <- strsplit(plotDat$geneID[i], "/")
@@ -109,8 +120,7 @@ DGOnetplot <- function(DGOResult,
   
   igraph::V(graphNet)$label <- c(termLabel, geneNames)
   
-  # set color for nodes
-  termCol <- RColorBrewer::brewer.pal(numGroups, termCol)
+  # set color for gene nodes
   geneCol <- rep(geneCol, numGenes)
   
   igraph::V(graphNet)$color <- c(termCol, geneCol)

@@ -19,14 +19,14 @@ warnOntN <- function(nDO, nGO, showCategory) {
   } else if (nDO < showCategory | nGO < showCategory){
     warn <- sprintf("Input showCategory = %d \n", showCategory)
     if (nDO < showCategory){
-      warn <- sprintf("%s%d Disease Ontology groups found.Check pvalueCutoff.\n", 
+      warn <- sprintf("%s%d Disease Ontology groups found.Check pAdjustCutoff.\n", 
                       warn, nDO)
       if (nDO == 0) {
         warn <- sprintf("%sOnly displaying GO enrichment results.\n", warn)
       } 
     } 
     if (nGO < showCategory) {
-      warn <- sprintf("%s%d Gene Ontology groups found.\nCheck pvalueCutoff.\n",
+      warn <- sprintf("%s%d Gene Ontology groups found.\nCheck pAdjustCutoff.\n",
                       warn, nGO)
       if (nGO == 0) {
         warn <- sprintf("%sOnly displaying GO enrichment results.\n", warn)
