@@ -21,23 +21,26 @@
 #' }
 #'
 #' @examples 
+#' \dontrun{
 #' # load data from DOSE
 #' library(DOSE)
 #' data(geneList)
 #' gene <- names(geneList)[abs(geneList) > 2]
-#' enrichDGO(gene, universe=names(geneList))
-#' 
-#'
+#' result <- enrichDGO(gene, universe=names(geneList))
+#' }
 #' @export
 #' @import org.Hs.eg.db
 #' @import BiocManager
 #' @importFrom DOSE enrichDO
 #' @importFrom clusterProfiler enrichGO
+#' 
 enrichDGO <- function(gene, Gont = "MF", Dont = "DO",
                       pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
                       qvalueCutoff = 0.2, minGSSize = 10, maxGSSize = 500,
                       readable = FALSE, pool = FALSE){
-  
+  data("DOLite2EG")
+  data("EG2DOLite")
+  data("DOLiteTerm")
   # perform enrichDO and enrichGO on input of genes.
   DOanalysis <- DOSE::enrichDO(gene, Dont, pvalueCutoff, pAdjustMethod, 
                                universe, minGSSize, maxGSSize, qvalueCutoff, readable)
