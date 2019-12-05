@@ -7,8 +7,8 @@
 DGObarplot(
   DGOResult,
   showCategory = 8,
-  DOcol = "red",
-  GOcol = "blue",
+  DOcol = c("red", "darksalmon"),
+  GOcol = c("blue", "lightskyblue"),
   pAdjustCutoff = 0.05
 )
 }
@@ -34,4 +34,24 @@ Returns a double bar graph of DO and GO analysis.
 \description{
 A function that draws a double bar graph
 of DO and GO analysis, ordered and colored by group and p.adjust value.
+}
+\examples{
+\dontrun{
+# load data from DOSE
+library(DOSE)
+data(geneList)
+gene <- names(geneList)[abs(geneList) > 2]
+result <- enrichDGO(gene, universe=names(geneList))
+
+# tamper the data little bit to see 
+# the full functionalities of DGOplot
+result$DO@result$p.adjust <-  result$DO@result$p.adjust / 10
+ 
+DGObarplot(result)
+DGObarplot(result,
+           DOcol = c("purple", "yellow"),
+           GOcol = c("red", "blue"),
+           showCategory = 6)
+}
+
 }

@@ -16,15 +16,35 @@
 #'   \item ordered by p.adjust value
 #' }
 #'
-#'
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' # load data from DOSE
+#' library(DOSE)
+#' data(geneList)
+#' gene <- names(geneList)[abs(geneList) > 2]
+#' result <- enrichDGO(gene, universe=names(geneList))
+#' 
+#' # tamper the data little bit to see 
+#' # the full functionalities of DGOplot
+#' result$DO@result$p.adjust <-  result$DO@result$p.adjust / 10
+#'  
+#' DGObarplot(result)
+#' DGObarplot(result,
+#'            DOcol = c("purple", "yellow"),
+#'            GOcol = c("red", "blue"),
+#'            showCategory = 6)
+#' }
+#' 
 #' @import ggplot2
 #' @import ggnewscale
 #' @import graphics
 
 
 DGObarplot <- function(DGOResult, showCategory = 8, 
-                       DOcol = "red", GOcol = "blue",
+                       DOcol = c("red", "darksalmon"),
+                       GOcol = c("blue", "lightskyblue"),
                        pAdjustCutoff = 0.05) {
   
   checkInput(DGOResult)
@@ -141,17 +161,10 @@ DGObarplot <- function(DGOResult, showCategory = 8,
   ldDG$ont <- dblBarData$ont[matches]
   
   # now for the color scheme of DO and GO
-  if (DOcol == "red" && GOcol == "blue") {
-    colHighD <- "darksalmon"
-    colLowD <- "red"
-    colHighG <- "lightskyblue"
-    colLowG <- "blue"
-  } else {
-    colHighD <- DOcol[1]
-    colLowD <- DOcol[2]
-    colHighG <- GOcol[1]
-    colLowG <- GOcol[2]
-  }
+  colLowD <- DOcol[1]
+  colHighD <- DOcol[2]
+  colLowG <- GOcol[1]
+  colHighG <- GOcol[2]
   
   
   # make a new plot with geom_rect as layers; 1 for DO and 1 for GO.
