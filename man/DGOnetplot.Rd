@@ -43,3 +43,22 @@ Returns a gene association network of DO and GO analyses.
 \description{
 A function that draws a gene association network with DO and GO terms from enrichment analyses.
 }
+\examples{
+\dontrun{
+# load data from DOSE
+library(DOSE)
+data(geneList)
+gene <- names(geneList)[abs(geneList) > 2]
+result <- enrichDGO(gene, universe=names(geneList))
+
+# tamper the data little bit to see 
+# the full functionalities of DGOplot
+result$DO@result$p.adjust <-  result$DO@result$p.adjust / 10
+
+DGOnetplot(result)
+DGOnetplot(result,
+           showCategory = 4,
+           cluster.strength = 5)
+}
+
+}
