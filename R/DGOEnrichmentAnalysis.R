@@ -45,9 +45,14 @@ enrichDGO <- function(gene, Gont = "MF", Dont = "DO",
   DOanalysis <- DOSE::enrichDO(gene, Dont, pvalueCutoff, pAdjustMethod, 
                                universe, minGSSize, maxGSSize, qvalueCutoff, readable)
   
-  GOanalysis <- clusterProfiler::enrichGO(gene, OrgDb = org.Hs.eg.db, keyType = "ENTREZID", Gont, pvalueCutoff, 
-                                          pAdjustMethod, universe, qvalueCutoff, minGSSize, 
-                                          maxGSSize, readable, pool)
+  GOanalysis <- clusterProfiler::enrichGO(gene, OrgDb = org.Hs.eg.db, 
+                                          keyType = "ENTREZID", Gont, 
+                                          pvalueCutoff, pAdjustMethod, 
+                                          universe, qvalueCutoff, 
+                                          minGSSize, maxGSSize, 
+                                          readable, pool)
+  
+  GOanalysis@result <- GOanalysis@result[ , colnames(DOanalysis@result)]
   
   DGOanalysis <- c(DOanalysis, GOanalysis)
   

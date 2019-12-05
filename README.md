@@ -11,14 +11,14 @@ The goal of DGOplot is to perform enrichment analses on Disease Ontology and Gen
 You can install the latest version of DGOplot using:
 ``` r
 require("devtools")
-install_github("JoelleJee/DGOplot")
+devtools::install_github("JoelleJee/DGOplot")
 library("DGOplot")
 ```
 ## Overview
 
 An overview of the package is illustrated below.
 ![](./inst/extdata/DGObarplot.png)
-![](./inst/extdata/DGOnetplot.jpg)
+![](./inst/extdata/DGOnetplot.png)
 ![](./inst/extdata/Jee_Y_A1.png)
 
 ## Contributions
@@ -28,11 +28,19 @@ The author of the package is Yoonsun Jee. The functions available within this pa
 ```r
 library("DGOplot")
 lsf.str("package:DGOplot")
-```
-- enrichDGO
-- DGObarplot
-- DGOnetplot
+# double bar plot to show DO and GO enrichment analyses results
+# DGObarplot : function (DGOResult, showCategory = 8, DOcol = c("red", "darksalmon"), GOcol = c("blue", "lightskyblue"), pAdjustCutoff = 0.05)  
 
+# draws a gene association network
+# DGOnetplot : function (DGOResult, showCategory = 6, pAdjustCutoff = 0.05, cluster.strength = 10, GOcol = c("blue", "lightblue"), 
+#     DOcol = c("red", "mistyrose"), termCol = "PuOr", geneCol = "honeydew3")  
+# computes GO and DO enrichment anlyses
+# enrichDGO : function (gene, Gont = "MF", Dont = "DO", pvalueCutoff = 0.05, pAdjustMethod = "BH", universe, qvalueCutoff = 0.2, 
+#     minGSSize = 10, maxGSSize = 500, readable = FALSE, pool = FALSE)  
+
+# shiny app GUI
+# runDGOplot : function ()  
+```
 The enrichDGO function performs the DO and GO enrichment analyses using functions from 
 DOSE and clusterProfiler R packages. The DOSE R package is used for DO enrichment analysis while the 
 clusterProfiler R package is used for GO enrichment analysis.

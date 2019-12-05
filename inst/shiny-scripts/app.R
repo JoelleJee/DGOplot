@@ -14,19 +14,12 @@
 #' @import shiny
 #' @importFrom DT DTOutput renderDT
 
-# load geneList data
+source("../../R/globals.R")
 library(DOSE)
-data("geneList")
-data("DO2EG")
-data("EG2DOLite")
-data("DOLiteTerm")
-
-# perform enrichDGO()
-gene <- names(geneList)[abs(geneList) > 2]
-result <- enrichDGO(gene, universe=names(geneList))
-# we will change the results to show the full 
-# functionalities of DGOplot.
-result$DO@result$p.adjust <-  result$DO@result$p.adjust / 10
+data(geneList)
+runiverse <<- names(geneList)
+rgene <<- names(geneList)[abs(geneList) > 2]
+rresult <<- enrichDGO(rgene, universe=runiverse)
 
 ui <- shiny::fluidPage(
   # title
@@ -45,6 +38,9 @@ ui <- shiny::fluidPage(
     shiny::tabPanel(title = "Compute DGO Enrichment Analysis",
              value = "enrich"),
     
+    shiny::tabPanel(title = "See input Files",
+             value = "file"),
+    
     shiny::tabPanel(title = "Quit",
              value = "stop",
              icon = icon("circle-o-notch"))
@@ -57,6 +53,20 @@ ui <- shiny::fluidPage(
       "change argument values:",
       
       width = 3,
+      
+      # Input: Select a file ----
+      shiny::fileInput("gene", "Upload a CSV File of EntrezIDs of gene of interest",
+                multiple = FALSE,
+                accept = c("text/csv",
+                           ".csv")
+      ),
+      
+      shiny::fileInput("universe", "Upload the CSV file of EntrezIDs and its expression
+              levels of the universe genes",
+                multiple = FALSE,
+                accept = c("text/csv",
+                           ".csv")
+      ),
       
       shiny::sliderInput(
         inputId = "pvalue",
@@ -137,8 +147,8 @@ ui <- shiny::fluidPage(
         selected = "DO"
       )
     ),
-    
-    shiny::mainPanel(
+  
+  shiny::mainPanel(
       shiny::conditionalPanel(
         condition = "input.navbar == 'enrich'",
         shiny::verticalLayout(
@@ -147,8 +157,15 @@ ui <- shiny::fluidPage(
         )
       ),
       shiny::conditionalPanel(
-        condition = "input.navbar != 'enrich'",
+        condition = "input.navbar == 'net' | input.navbar == 'bar'",
         shiny::plotOutput("plot")
+      ),
+      shiny::conditionalPanel(
+        condition = "input.navbar == 'file'",
+        shiny::splitLayout(
+          DT::DTOutput("inputGene"),
+          DT::DTOutput("universe")
+        )
       )
     )
   )
@@ -157,12 +174,34 @@ ui <- shiny::fluidPage(
 server <- function(input, output) {
   
   shiny::observe({
-    
-    # render DGObarplot
-    if (input$navbar == "bar") {
+    if (input$navbar == "file"){
+      if (!(is.null(input$gene))){
+        rgene <<- read.csv(input$gene$datapath, 
+                         header = FALSE)
+        geneC <- rgene
+        output$inputGene <- DT::renderDT(geneC)
+        rgene <<- as.character(unlist(rgene))
+        names(rgene) <<- c()
+      } 
+      if (!(is.null(input$universe))) {
+        runiverse <<- read.csv(input$universe$datapath,
+                             header = FALSE)
+        universeC <- runiverse
+        output$universe <- DT::renderDT(universeC)
+        exprVal <- unlist(runiverse[2])
+        geneNames <- unlist(runiverse[1])
+        runiverse <<- exprVal
+        names(runiverse) <<- geneNames
+      } else {
+        return(NULL)
+      }
+        
+      # rendering the double bar plot  
+    } else if (input$navbar == "bar") {
+      if (is.null(rresult)) return(NULL)
       output$plot <- shiny::renderPlot(
         
-        expr = DGObarplot(result, 
+        expr = DGObarplot(rresult, 
                           showCategory=input$barShow, 
                           pAdjustCutoff=input$p.adjust,
                           DOcol=c(input$DOlow, input$DOhigh),
@@ -175,9 +214,10 @@ server <- function(input, output) {
       )
       # render DGOnetplot
     } else if (input$navbar == "net") {
+      if (is.null(rresult)) return(NULL)
       output$plot <- shiny::renderPlot(
         
-        expr = DGOnetplot(result, 
+        expr = DGOnetplot(rresult, 
                           showCategory=input$netShow, 
                           pAdjustCutoff=input$p.adjust,
                           DOcol=c(input$DOlow, input$DOhigh),
@@ -190,29 +230,28 @@ server <- function(input, output) {
       )
       # render the enrichment analyses data
     } else if (input$navbar == "enrich") {
-      result <<- enrichDGO(gene = gene,
-                           Gont = input$GOoption,
-                           Dont = input$DOoption,
-                           universe = names(geneList),
-                           pvalueCutoff = input$pvalue)
-      # original result doesn't show significant p.adjust value
-      # for the purpose of visualizing how DGObarplot and DGOnetplot work,
-      # we will change the values manually
-      result$DO@result[p.adjust] <<- result$DO@result[p.adjust] / 10
-      output$DOenrich <- DT::renderDT(
-        DT::datatable(
-          result$DO@result[1:20, 
-                           c("Description", "p.adjust", "Count")],
-          escape = FALSE))
-      
-      output$GOenrich <- DT::renderDT(
-        DT::datatable(
-          result$GO@result[1:20, 
-                           c("Description", "p.adjust", "Count")],
-          escape = FALSE))
+      if (is.null(rgene) || is.null(runiverse)) {
+        return(NULL)
+      } else{ 
+        rresult <<- enrichDGO(gene = rgene,
+                              Gont = input$GOoption,
+                              Dont = input$DOoption,
+                              universe = runiverse,
+                              pvalueCutoff = input$pvalue)
+        
+        output$DOenrich <- DT::renderDT(
+          DT::datatable(
+            rresult$DO@result,
+            escape = FALSE))
+        
+        output$GOenrich <- DT::renderDT(
+          DT::datatable(
+            rresult$GO@result,
+            escape = FALSE))
+      }
     } else if (input$navbar == "stop") {
       shiny::stopApp()
-    }
+    } 
   })
 }  
 shiny::shinyApp(ui = ui, server = server)
