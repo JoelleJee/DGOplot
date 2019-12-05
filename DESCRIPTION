@@ -23,7 +23,8 @@ Imports:
   annotate,
   RColorBrewer,
   stats,
-  shiny
+  shiny,
+  DT
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.0
 Suggests: 

@@ -12,7 +12,7 @@
 #' 
 #' @import DOSE
 #' @import shiny
-#' @importFrom DT datatable DTOutput renderDT
+#' @importFrom DT DTOutput renderDT
 
 # load geneList data
 library(DOSE)
