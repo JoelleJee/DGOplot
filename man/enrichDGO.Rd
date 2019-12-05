@@ -52,11 +52,11 @@ Returns a list of 2 enrichResults
 A function that performs DO and GO enrichment analysis given a list of geneIDs.
 }
 \examples{
+\dontrun{
 # load data from DOSE
 library(DOSE)
 data(geneList)
 gene <- names(geneList)[abs(geneList) > 2]
-enrichDGO(gene, universe=names(geneList))
-
-
+result <- enrichDGO(gene, universe=names(geneList))
+}
 }
