@@ -47,8 +47,8 @@ head(geneList)
 DGOResult <- enrichDGO(gene, 
                        universe=names(geneList),
                        pvalueCutoff = 0.5)
-DT::renderDT(DGOResulT$GO@result, escape = FALSE)
-DT::renderDT(DGOResult$DO@result, escape = FALSE)
+head(DGOResult$GO@result)
+head(DGOResult$DO@result)
 ```
 
 ## Barplot
