@@ -47,7 +47,8 @@ head(geneList)
 DGOResult <- enrichDGO(gene, 
                        universe=names(geneList),
                        pvalueCutoff = 0.5)
-head(DGOResult)
+DT::renderDT(DGOResulT$GO@result, escape = FALSE)
+DT::renderDT(DGOResult$DO@result, escape = FALSE)
 ```
 
 ## Barplot
@@ -70,7 +71,9 @@ Visualization of gene association to the ontology groups. Layout is adapted from
 ```{r, echo = TRUE, warning=TRUE}
 DGOnetplot(DGOResult)
 DGOnetplot(DGOResult, showCategory = 5)
-DGOnetplot(DGOResult, pvalueCutoff = 0.05)
+DGOnetplot(DGOResult, 
+           cluster.strength = 5,
+           pAdjustCutoff = 0.05)
 ```
 
 Warnings are generated when the available number of groups for each ontology enrichment results are smaller than the showCategory value given. The color of the ontology nodes are produced by `RColorBrewer::brewer.pal(numGroups, "PuOr")`. 
