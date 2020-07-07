@@ -1,5 +1,5 @@
 
-# DGOplot
+# DGOplot: Disease and Gene Ontology Enrichment Analysis and Plotting
 
 <!-- badges: start -->
 <!-- badges: end -->
