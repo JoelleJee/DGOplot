@@ -6,6 +6,8 @@
 
 The goal of DGOplot is to perform enrichment analses on Disease Ontology and Gene Ontology and plot the result into a bar plot and a gene association network. Currently limited to HUMAN DATA ONLY.
 
+![](./inst/extdata/Jee_Y_A1.png)
+
 ## Installation
 
 You can install the latest version of DGOplot using:
@@ -16,10 +18,13 @@ library("DGOplot")
 ```
 ## Overview
 
-An overview of the package is illustrated below.
+Plotting DO and GO enrichment analyses two ways:
+
 ![](./inst/extdata/DGObarplot.png)
+\
 ![](./inst/extdata/DGOnetplot.png)
-![](./inst/extdata/Jee_Y_A1.png)
+\
+The red and blue edges indicate DO and GO, respectively.
 
 ## Contributions
 
@@ -68,6 +73,9 @@ DGOnetplot(x, showCategory=5)
 
 ## Dependencies
 
-Orgs.Hs.eg.db: Human genome data
-ggnewscale, ggplot2, igraph: For bar plot and network plot
+Orgs.Hs.eg.db
+* Human genome data
+
+ggnewscale, ggplot2, igraph
+* For bar plot and network plot
 
